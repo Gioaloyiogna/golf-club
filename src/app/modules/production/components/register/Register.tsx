@@ -1,24 +1,48 @@
-import {Button, Dropdown, Input, MenuProps, Space, Table} from 'antd'
+import {Button, Dropdown, Input, MenuProps, Space, Table, Modal, message, Form} from 'antd'
 import {useState} from 'react'
 import {Link, Route, Routes} from 'react-router-dom'
 import {KTCard, KTCardBody, KTSVG} from '../../../../../_metronic/helpers'
 import Add from './add/Registration'
 import {PageLink, PageTitle} from '../../../../../_metronic/layout/core'
-import {Query, QueryClient, useQuery, useQueryClient} from 'react-query'
+import {Query, QueryClient, useMutation, useQuery, useQueryClient} from 'react-query'
 import {getMembers} from '../Requests'
-import {id} from "date-fns/locale";
+import {id} from 'date-fns/locale'
+import {
+  CheckOutlined,
+  CloseCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FileAddOutlined,
+  PlusOutlined,
+} from '@ant-design/icons'
+import axios from 'axios'
+import {API_URL} from '../../../../urls'
 
 const Register = () => {
   // const [gridData, setGridData] = useState([])
 
   const {data: members, isLoading} = useQuery('membersQuery', () => getMembers())
+  const [messageApi, contextHolder] = message.useMessage()
+  const [isEditing, setIsEditing] = useState(false)
+  const [editMemberDetails, setEditMemberDetails] = useState<any>(null)
+  const {mutate: upDateMember} = useMutation((data: any) => axios.put(`${API_URL}/members/${data.id}`, data))
+  const [form] = Form.useForm()
+  const queryClient = useQueryClient()
   // const [searchText, setSearchText] = useState('')
   // let [filteredData] = useState([])
   console.log('Members', members)
   const onMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e)
   }
-
+  const layout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 },
+  };
+  
+  const tailLayout = {
+    wrapperCol: { offset: 8, span: 16 },
+    
+  };
   const items = [
     {
       key: '1',
@@ -33,23 +57,23 @@ const Register = () => {
       label: 'Suspend',
     },
     {
-        key: '4',
-        label: 'Edit',
-    }
+      key: '4',
+      label: 'Edit',
+    },
   ]
   const columns: any = [
     {
-        title: 'Entry ID',
-        dataIndex: 'id',
-        //sort default order of data by dataindex id in ascending order
-        sorter: (a: any, b: any) => a.id - b.id,
-        defaultSortOrder: 'descend',
+      title: 'Entry ID',
+      dataIndex: 'id',
+      //sort default order of data by dataindex id in ascending order
+      sorter: (a: any, b: any) => a.id - b.id,
+      defaultSortOrder: 'descend',
     },
     {
       title: 'Picture',
       dataIndex: 'picture',
       //sort default order of data by dataindex id
-        sorter: (a: any, b: any) => a.id - b.id,
+      sorter: (a: any, b: any) => a.id - b.id,
     },
     {
       title: 'Membership ID',
@@ -112,44 +136,127 @@ const Register = () => {
     },
     {
       title: 'Action',
-      render: () => (
-        <>
-          {/*reset button style*/}
-          <Dropdown.Button menu={{items, onClick: onMenuClick}}>Actions</Dropdown.Button>
-          {/*<Button className='bg-success me-3'>*/}
-          {/*  Activate*/}
-          {/*  </Button>*/}
-          {/*<Button className='bg-primary me-3'>*/}
-          {/*  Suspend*/}
-          {/*</Button>*/}
-          {/*<Button className='bg-danger me-3'>*/}
-          {/*  Deactivate*/}
-          {/*</Button>*/}
-        </>
-      ),
+      render: (record: any) => {
+        return (
+          <>
+            <div className='d-flex justify-content-around'>
+              <button
+                className='bg-success border-0  text-white mx-1 d-flex flex-column justify-content-center p-2'
+                onClick={() => editMember(record)}
+              >
+                <EditOutlined title='Edit' />
+              </button>
+
+              <button
+                className='bg-primary border-0 text-white mx-1  d-flex flex-column justify-content-center  p-2'
+                onClick={() => activateUser(record.id)}
+              >
+                <CheckOutlined title='Activate' />
+              </button>
+              <button
+                className='bg-danger border-0 text-white mx-1  d-flex flex-column justify-content-center  p-2'
+                onClick={() => deactivateUser(record.id)}
+              >
+                <CloseCircleOutlined title='Suspend' />
+              </button>
+            </div>
+          </>
+        )
+      },
     },
   ]
 
-  const queryClient = useQueryClient()
-    const globalSearch = (value: any) => {
+  const globalSearch = (value: any) => {
     const query = queryClient.getQueryData<Query<any>>('membersQuery')
+    //@ts-ignore
+    if (query?.data) {
       //@ts-ignore
-      if (query?.data) {
-        //@ts-ignore
-        const filteredData = query?.data.filter((item: any) => {
-          return item.fname.toLowerCase().includes(value.toLowerCase())
+      const filteredData = query?.data.filter((item: any) => {
+        return item.fname.toLowerCase().includes(value.toLowerCase())
+      })
+      console.log('filteredData', filteredData)
+      queryClient.setQueryData('membersQuery', {data: filteredData})
+    }
+  }
+  const handleInputChange = (e: any) => {
+    globalSearch(e.target.value)
+    if (e.target.value === '') {
+      queryClient.invalidateQueries('membersQuery')
+    }
+  }
+  //Activating members
+  const activateUser = (id: any) => {
+    Modal.confirm({
+      okText: 'Yes',
+      okType: 'danger',
+      title: 'Are you sure, you want to activate Member?',
+      onOk: () => {
+        axios.post(`${API_URL}/ActivateMember?id=${id}`).then((response) => {
+          if (response.status == 200) {
+            messageApi.success('Member was successfully activated!')
+            queryClient.invalidateQueries('membersQuery')
+          }
         })
-        console.log('filteredData', filteredData)
-        queryClient.setQueryData('membersQuery', {data: filteredData})
-      }
-    }
-    const handleInputChange = (e: any) => {
-      globalSearch(e.target.value)
-      if (e.target.value === '') {
-        queryClient.invalidateQueries('membersQuery')
-      }
-    }
+      },
+    })
+  }
+  //deactivating members
+  const deactivateUser = (id: any) => {
+    Modal.confirm({
+      okText: 'Yes',
+      okType: 'danger',
+      title: 'Are you sure, you want to deactivate Member?',
+      onOk: () => {
+        axios.post(`${API_URL}/DeactivateMember?id=${id}`).then((response) => {
+          if (response.status == 200) {
+            messageApi.success('Member was successfully deactivated!')
+            queryClient.invalidateQueries('membersQuery')
+          }
+        })
+      },
+    })
+  }
+  // handle submit form
 
+  const submitForm = () => {
+    // form.validateFields()
+    // .then(values => {
+    // })
+    // .catch(error => console.log(error));
+  }
+
+  const editMember = (record: any) => {
+    setIsEditing(true)
+    setEditMemberDetails(record)
+  }
+  // submotting editing form
+
+  const onFinish = (values: any) => {
+    Modal.confirm({
+      title: 'Are you sure you want to save the records?',
+      content: 'This action cannot be undone',
+      okText: 'Yes',
+      okType: 'primary',
+      cancelText: 'No',
+      onOk() {
+        console.log(values);
+        
+        upDateMember(values, {
+          onSuccess: () => {
+            setIsEditing(false)
+        
+            message.success('Member updated successfully')
+            form.resetFields()
+            queryClient.invalidateQueries('membersQuery')
+            
+          },
+          onError: (error: any) => {
+            message.error('Failed to update Member')
+          },
+        })
+      },
+    })
+  }
   return (
     <Routes>
       {/*index*/}
@@ -157,6 +264,7 @@ const Register = () => {
         path='/'
         element={
           <>
+            {contextHolder}
             <PageTitle>Members</PageTitle>
             <KTCard>
               <KTCardBody>
@@ -182,7 +290,129 @@ const Register = () => {
                     </Link>
                   </Space>
                 </div>
-                <Table rowKey={"id"} columns={columns} bordered loading={isLoading} dataSource={members?.data}/>
+                <Table
+                  className='table-responsive'
+                  rowKey={'id'}
+                  columns={columns}
+                  bordered
+                  loading={isLoading}
+                  dataSource={members?.data}
+                />
+                <Modal
+                  title='Edit Member'
+                  open={isEditing}
+                  onCancel={() => setIsEditing(false)}
+                  closable={true}
+                  footer={null}
+                >
+                  <Form
+                    style={{maxWidth: 600}}
+                    form={form}
+                    disabled={false}
+                    initialValues={editMemberDetails}
+                    onFinish={onFinish}
+                    {...layout}
+                   name="control-hooks"
+
+                  >
+                     <Form.Item
+                     hidden={true}
+                     name={'id'}
+                     hasFeedback
+                   >
+                     <Input value={editMemberDetails?.id} disabled={false} type='hidden' />
+                   </Form.Item>
+                    <Form.Item
+                      label='First Name'
+                      rules={[{required: true, message: 'Please input your First Name!'}]}
+                      name={'fname'}
+                      hasFeedback
+                    >
+                      <Input value={editMemberDetails?.fname} disabled={false} />
+                    </Form.Item>
+                    <Form.Item
+                      label='Last Name'
+                      rules={[{required: true, message: 'Please input your Last Name!'}]}
+                      name={'lname'}
+                      hasFeedback
+                    >
+                      <Input placeholder='Enter Last Name' value={editMemberDetails?.lname} />
+                    </Form.Item>
+
+                    <Form.Item
+                      label='Email'
+                      rules={[{required: true, message: 'Please input your Email!'}]}
+                      name={'email'}
+                      hasFeedback
+                    >
+                      <Input placeholder='Enter Email' value={editMemberDetails?.email} />
+                    </Form.Item>
+                    <Form.Item
+                      label='Gender'
+                      rules={[{required: true, message: 'Please input your Gender!'}]}
+                      name={'gender'}
+                      hasFeedback
+                    >
+                      <Input placeholder='input placeholder' value={editMemberDetails?.gender} />
+                    </Form.Item>
+                    <Form.Item
+                      label='Date OF Birth'
+                      rules={[{required: true, message: 'Please input your date of birth!'}]}
+                      name={'DOB'}
+                      hasFeedback
+                    >
+                      <Input
+                        placeholder='Enter Last Name'
+                        defaultValue={editMemberDetails?.DOB}
+                        type='date'
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label='Player Handicap'
+                      rules={[{required: true, message: 'Please input your Last Name!'}]}
+                      name={'playerHandicap'}
+                      hasFeedback
+                    >
+                      <Input
+                        placeholder='Enter Last Player Handicap'
+                        value={editMemberDetails?.playerHandicap}
+                        type='number'
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label='GGAID'
+                      rules={[{required: true, message: 'Please input your GGAID!'}]}
+                      name={'ggaid'}
+                      hasFeedback
+                    >
+                      <Input placeholder='Enter your GGAID' value={editMemberDetails?.ggaid}  />
+                    </Form.Item>
+                    <Form.Item
+                      label='Status'
+                      rules={[{required: true, message: 'Please enter your status!'}]}
+                      name={'status'}
+                      hasFeedback
+                    >
+                      <Input placeholder='Enter Satus' value={editMemberDetails?.status} />
+                    </Form.Item>
+                    <Form.Item
+                      label='Picture'
+                      // rules={[{required: true, message: 'Please upload file!'}]}
+                      name={'picture'}
+                      //hasFeedback
+                    >
+                      <Input placeholder='Enter Satus' value={editMemberDetails?.status}  type='file'/>
+                    </Form.Item>
+                    <Form.Item {...tailLayout}>
+                      <Button key='back' onClick={() => setIsEditing(false)} className='me-1'>
+                        Cancel
+                      </Button>
+                      <Button key='submit' type='primary' htmlType='submit'>
+                        Save
+                      </Button>
+                    </Form.Item>
+                  </Form>
+                </Modal>
               </KTCardBody>
             </KTCard>
           </>
@@ -202,4 +432,6 @@ const Register = () => {
   )
 }
 
+
 export {Register}
+

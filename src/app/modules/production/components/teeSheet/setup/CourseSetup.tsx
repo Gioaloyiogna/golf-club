@@ -286,10 +286,14 @@ export const Course: any = () => {
                 </Space>
               </div>
                 <Table columns={columns} bordered loading={isLoading} dataSource={courses?.data} />
+               
             </KTCardBody>
         </KTCard>
+       
     </>
+    
   )
 }
+
 
 

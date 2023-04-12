@@ -43,6 +43,12 @@ export function AsideMenuMain() {
         icon='/media/icons/duotune/ecommerce/ecm001.svg'
         title='Shop'
       />
+      <AsideMenuItem
+        to='Gio'
+        fontIcon='bi-archive'
+        icon='/media/icons/duotune/ecommerce/ecm001.svg'
+        title='Gio'
+      />
       {/*<AsideMenuItem to='pos' fontIcon='bi-archive' icon='/media/icons/duotune/finance/fin007.svg' title='POS' />*/}
       {/*<AsideMenuItem to='partners' fontIcon='bi-archive' icon='/media/icons/duotune/technology/teh010.svg' title='Partners' />*/}
       {/*<AsideMenuItem to='card-management' fontIcon='bi-archive' icon='/media/icons/duotune/finance/fin002.svg' title='Card Management' />*/}
