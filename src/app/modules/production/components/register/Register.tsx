@@ -1,5 +1,5 @@
 import {Button, Dropdown, Input, MenuProps, Space, Table, Modal, message, Form} from 'antd'
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {Link, Route, Routes} from 'react-router-dom'
 import {KTCard, KTCardBody, KTSVG} from '../../../../../_metronic/helpers'
 import Add from './add/Registration'
@@ -25,6 +25,7 @@ const Register = () => {
   const [messageApi, contextHolder] = message.useMessage()
   const [isEditing, setIsEditing] = useState(false)
   const [editMemberDetails, setEditMemberDetails] = useState<any>(null)
+  const [neweditMemberDetails, setnewEditMemberDetails] = useState<any>(null)
   const {mutate: upDateMember} = useMutation((data: any) => axios.put(`${API_URL}/members/${data.id}`, data))
   const [form] = Form.useForm()
   const queryClient = useQueryClient()
@@ -184,6 +185,8 @@ const Register = () => {
       queryClient.invalidateQueries('membersQuery')
     }
   }
+
+  
   //Activating members
   const activateUser = (id: any) => {
     Modal.confirm({
@@ -225,12 +228,21 @@ const Register = () => {
     // .catch(error => console.log(error));
   }
 
-  const editMember = (record: any) => {
+  const editMember = (id: any) => {
+    // form.resetFields()
+    // queryClient.invalidateQueries('membersQuery')
+    setEditMemberDetails(id)
     setIsEditing(true)
-    setEditMemberDetails(record)
   }
+  console.log(editMemberDetails);
+  
+  useEffect(()=>{
+    
+  }, [editMemberDetails])
   // submotting editing form
-
+   const handleUpdate=(record: any)=>{
+      editMember(record)
+   }
   const onFinish = (values: any) => {
     Modal.confirm({
       title: 'Are you sure you want to save the records?',
@@ -320,7 +332,7 @@ const Register = () => {
                      name={'id'}
                      hasFeedback
                    >
-                     <Input value={editMemberDetails?.id} disabled={false} type='hidden' />
+                     <Input value={editMemberDetails?.id} disabled={false} type='hidden'   />
                    </Form.Item>
                     <Form.Item
                       label='First Name'
