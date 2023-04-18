@@ -25,8 +25,10 @@ const Register = () => {
   const [messageApi, contextHolder] = message.useMessage()
   const [isEditing, setIsEditing] = useState(false)
   const [editMemberDetails, setEditMemberDetails] = useState<any>(null)
-  
-  const {mutate: upDateMember} = useMutation((data: any) => axios.put(`${API_URL}/members/${data.id}`, data))
+  const [editnewMemberDetails, setEditnewMemberDetails] = useState<any>(null)
+  const {mutate: upDateMember} = useMutation((data: any) =>
+    axios.put(`${API_URL}/members/${data.id}`, data)
+  )
   const [form] = Form.useForm()
   const queryClient = useQueryClient()
   // const [searchText, setSearchText] = useState('')
@@ -36,14 +38,13 @@ const Register = () => {
     console.log('click', e)
   }
   const layout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 },
-  };
-  
+    labelCol: {span: 8},
+    wrapperCol: {span: 16},
+  }
+
   const tailLayout = {
-    wrapperCol: { offset: 8, span: 16 },
-    
-  };
+    wrapperCol: {offset: 8, span: 16},
+  }
   const items = [
     {
       key: '1',
@@ -63,20 +64,7 @@ const Register = () => {
     },
   ]
   const columns: any = [
-    {
-      title: 'Entry ID',
-      dataIndex: 'id',
-      //sort default order of data by dataindex id in ascending order
-      sorter: (a: any, b: any) => a.id - b.id,
-      defaultSortOrder: 'descend',
-    },
-    {
-      title: 'Picture',
-      dataIndex: 'picture',
-      //sort default order of data by dataindex id
-      sorter: (a: any, b: any) => a.id - b.id,
-    },
-    {
+     {
       title: 'Membership ID',
       sorter: (a: any, b: any) => {
         if (a.txmanf > b.txmanf) {
@@ -89,6 +77,14 @@ const Register = () => {
       },
       dataIndex: 'code',
     },
+   
+    {
+      title: 'Picture',
+      dataIndex: 'picture',
+      //sort default order of data by dataindex id
+      sorter: (a: any, b: any) => a.id - b.id,
+    },
+   
     {
       title: 'First Name',
       sorter: (a: any, b: any) => {
@@ -173,7 +169,11 @@ const Register = () => {
     if (query?.data) {
       //@ts-ignore
       const filteredData = query?.data.filter((item: any) => {
-        return item.fname.toLowerCase().includes(value.toLowerCase())
+        return (
+          item.fname.toLowerCase().includes(value.toLowerCase()) ||
+          item.lname.toLowerCase().includes(value.toLowerCase())||
+          item.email.toLowerCase().includes(value.toLowerCase())
+        )
       })
       console.log('filteredData', filteredData)
       queryClient.setQueryData('membersQuery', {data: filteredData})
@@ -227,33 +227,42 @@ const Register = () => {
   }
 
   const editMember = (record: any) => {
-    
-    setEditMemberDetails({...record})
-    handleEdit()
-  }
-  const handleEdit=()=>{
-    form.resetFields()
+    // setEditMemberDetails({...record})
+    form.setFieldsValue({
+      id:record.id,
+      fname: record.fname,
+      lname:record.lname,
+      email:record.email,
+      gender:record.gender,
+      DOB:record.DOB,
+      playerHandicap:record.playerHandicap,
+      ggaid:record.ggaid,
+      status:record.status,
+      picture:record.picture
+
+    })
+    // form.resetFields()
     queryClient.invalidateQueries('membersQuery')
     setIsEditing(true)
   }
+
   const onFinish = (values: any) => {
     Modal.confirm({
       title: 'Are you sure you want to save the records?',
       content: 'This action cannot be undone',
-      okText: 'Yes',
+      okText: 'Yes',  
       okType: 'primary',
       cancelText: 'No',
       onOk() {
-        console.log(values);
-        
+        console.log(values)
+
         upDateMember(values, {
           onSuccess: () => {
             setIsEditing(false)
-        
+
             message.success('Member updated successfully')
             form.resetFields()
             queryClient.invalidateQueries('membersQuery')
-            
           },
           onError: (error: any) => {
             message.error('Failed to update Member')
@@ -317,16 +326,11 @@ const Register = () => {
                     initialValues={editMemberDetails}
                     onFinish={onFinish}
                     {...layout}
-                   name="control-hooks"
-
+                    name='control-hooks'
                   >
-                     <Form.Item
-                     hidden={true}
-                     name={'id'}
-                     hasFeedback
-                   >
-                     <Input value={editMemberDetails?.id} disabled={false} type='hidden' />
-                   </Form.Item>
+                    <Form.Item hidden={true} name={'id'} hasFeedback>
+                      <Input value={editMemberDetails?.id} disabled={false} type='hidden' />
+                    </Form.Item>
                     <Form.Item
                       label='First Name'
                       rules={[{required: true, message: 'Please input your First Name!'}]}
@@ -390,7 +394,7 @@ const Register = () => {
                       name={'ggaid'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter your GGAID' value={editMemberDetails?.ggaid}  />
+                      <Input placeholder='Enter your GGAID' value={editMemberDetails?.ggaid} />
                     </Form.Item>
                     <Form.Item
                       label='Status'
@@ -406,7 +410,11 @@ const Register = () => {
                       name={'picture'}
                       //hasFeedback
                     >
-                      <Input placeholder='Enter Satus' value={editMemberDetails?.status}  type='file'/>
+                      <Input
+                        placeholder='Enter Satus'
+                        value={editMemberDetails?.status}
+                        type='file'
+                      />
                     </Form.Item>
                     <Form.Item {...tailLayout}>
                       <Button key='back' onClick={() => setIsEditing(false)} className='me-1'>
@@ -437,6 +445,4 @@ const Register = () => {
   )
 }
 
-
 export {Register}
-
