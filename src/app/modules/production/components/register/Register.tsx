@@ -227,12 +227,15 @@ const Register = () => {
   }
 
   const editMember = (record: any) => {
+    
+    setEditMemberDetails({...record})
+    handleEdit()
+  }
+  const handleEdit=()=>{
     form.resetFields()
     queryClient.invalidateQueries('membersQuery')
     setIsEditing(true)
-    setEditMemberDetails({...record})
   }
-  
   const onFinish = (values: any) => {
     Modal.confirm({
       title: 'Are you sure you want to save the records?',
