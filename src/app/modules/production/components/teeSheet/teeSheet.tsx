@@ -14,8 +14,9 @@ import {id} from 'date-fns/locale'
 import {object, string} from 'yup'
 import TabPane from 'antd/es/tabs/TabPane'
 import {log} from 'console'
-import {fetchTees, getPlayerMembers} from '../../Requests'
+
 import {query} from 'express'
+import {fetchTees, getPlayerMembers} from '../Requests'
 
 const teeSlot = [
   ['T06:00:00Z', 'T06:10:00Z', 'T06:20:00Z', 'T06:30:00Z', 'T06:40:00Z', 'T06:50:00Z'],
@@ -85,6 +86,7 @@ const TeeSheet = () => {
   )
   var counter = 6
   const [SlotsNumber, setSlotsNumber] = useState<any>([])
+
   const [formData, setFormData] = useState({
     memberId: '',
     playerType: 'Member',
@@ -125,7 +127,7 @@ const TeeSheet = () => {
         onSuccess: () => {
           // setIsEditing(false)
 
-          message.success('Member updated successfully')
+          message.success('Member added successfully')
           queryClient.invalidateQueries('membersQuery')
           queryClient.invalidateQueries('tees')
           form.resetFields()
@@ -172,6 +174,7 @@ const TeeSheet = () => {
 
         message.success('Member added successfully')
         queryClient.invalidateQueries('membersQuery')
+        queryClient.invalidateQueries('tees')
         form.resetFields()
         //queryClient.invalidateQueries('membersQuery')
       },
