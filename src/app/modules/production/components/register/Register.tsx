@@ -263,7 +263,7 @@ const Register = () => {
       okType: 'primary',
       cancelText: 'No',
       onOk() {
-        console.log(values)
+     
 
         upDateMember(values, {
           onSuccess: () => {

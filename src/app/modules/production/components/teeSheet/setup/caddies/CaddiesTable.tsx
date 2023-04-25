@@ -1,17 +1,18 @@
-import {Button, Form, Input, Modal, Space, Table} from 'antd'
+import {Button, Form, Input, Modal, Space, Table, message} from 'antd'
 import {Link, Route, Routes} from 'react-router-dom'
 import {useState} from 'react'
 import {KTCard, KTCardBody, KTSVG} from '../../../../../../../_metronic/helpers'
-import {useQuery} from 'react-query'
-import {getAllCaddiesApi} from '../../../Requests'
+import {QueryClient, useMutation, useQuery, useQueryClient} from 'react-query'
+import {getAllCaddiesApi, updateCaddyApi} from '../../../Requests'
 import {render} from 'react-dom'
-
 
 export function CaddiesTable() {
   const [loading, setLoading] = useState(false)
-  const {data: getAllCaddies, isLoading} = useQuery('caddiesQuery', () => getAllCaddiesApi())
+  const {data: getAllCaddies, isLoading} = useQuery('caddiesQuery', ()=> getAllCaddiesApi())
+  const {mutate: updateCaddy} = useMutation((data: any) => updateCaddyApi(data))
   const [editCaddyDetails, seteditCaddyDetails] = useState<any>(null)
   const [isEditing, setIsEditing] = useState(false)
+  const  queryClient=useQueryClient()
   const [form] = Form.useForm()
   const columns: any = [
     {
@@ -72,7 +73,11 @@ export function CaddiesTable() {
         return (
           <>
             <Space size='middle'>
-              <a href='#' className='btn btn-light-warning btn-sm' onClick={()=>editCaddy(record.Id)}>
+              <a
+                href='#'
+                className='btn btn-light-warning btn-sm'
+                onClick={() => editCaddy(record)}
+              >
                 Update
               </a>
               <a href='#' className='btn btn-light-primary btn-sm'>
@@ -87,9 +92,19 @@ export function CaddiesTable() {
       },
     },
   ]
-  const editCaddy=(id:any)=>{
-      setIsEditing(true)
-      // const Caddy=getAllCaddies?.data.filter()
+  const editCaddy = (record: any) => {
+    setIsEditing(true)
+    form.setFieldsValue({
+      id: record.id,
+      fname: record.fname,
+      lname: record.lname,
+      email: record.email,
+      gender: record.gender,
+      picture: record.picture,
+      code: record.code,
+      address: record.address,
+    })
+    // const Caddy=getAllCaddies?.data.filter()
   }
   const layout = {
     labelCol: {span: 8},
@@ -101,7 +116,29 @@ export function CaddiesTable() {
   }
   // method to update caddies
   function onFinish(values: any): void {
-    console.log(values)
+    Modal.confirm({
+      title: 'Are you sure you want to save the records?',
+      content: 'This action cannot be undone',
+      okText: 'Yes',
+      okType: 'primary',
+      cancelText: 'No',
+      onOk() {
+        updateCaddy(values, {
+          onSuccess: () => {
+            setIsEditing(false)
+
+            message.success('Member updated successfully')
+            form.resetFields()
+             queryClient.invalidateQueries('caddiesQuery')
+          },
+          onError: (error: any) => {
+            message.error('Failed to update member. Kindly, Check email and code if not already exists')
+            console.log(error.message);
+            
+          },
+        })
+      },
+    })
   }
 
   return (
@@ -151,7 +188,15 @@ export function CaddiesTable() {
             name='control-hooks'
           >
             <Form.Item hidden={true} name={'id'} hasFeedback>
-              <Input value={editCaddyDetails?.id} disabled={false} type='hidden' />
+              <Input value='' disabled={false} type='hidden' />
+            </Form.Item>
+            <Form.Item
+              label='Code'
+              rules={[{required: true, message: 'Please input your code!'}]}
+              name={'code'}
+              hasFeedback
+            >
+              <Input value='' disabled={false} style={{color: 'gray', fontSize: '0.9rem'}} />
             </Form.Item>
             <Form.Item
               label='First Name'
@@ -159,11 +204,7 @@ export function CaddiesTable() {
               name={'fname'}
               hasFeedback
             >
-              <Input
-                value={editCaddyDetails?.fname}
-                disabled={false}
-                style={{color: 'gray', fontSize: '0.9rem'}}
-              />
+              <Input value='' disabled={false} style={{color: 'gray', fontSize: '0.9rem'}} />
             </Form.Item>
             <Form.Item
               label='Last Name'
@@ -173,7 +214,7 @@ export function CaddiesTable() {
             >
               <Input
                 placeholder='Enter Last Name'
-                value={editCaddyDetails?.lname}
+                value=''
                 style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
               />
             </Form.Item>
@@ -186,7 +227,7 @@ export function CaddiesTable() {
             >
               <Input
                 placeholder='Enter Email'
-                value={editCaddyDetails?.email}
+                value=''
                 style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
               />
             </Form.Item>
@@ -203,55 +244,18 @@ export function CaddiesTable() {
               />
             </Form.Item>
             <Form.Item
-              label='Date OF Birth'
-              rules={[{required: true, message: 'Please input your date of birth!'}]}
-              name={'DOB'}
+              label='Addrdess'
+              rules={[{required: true, message: 'Please input your address!'}]}
+              name={'address'}
               hasFeedback
             >
               <Input
-                placeholder='Enter Last Name'
-                defaultValue={editCaddyDetails?.DOB}
-                type='date'
+                placeholder='input placeholder'
+                value=''
                 style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
               />
             </Form.Item>
-            <Form.Item
-              label='Player Handicap'
-              rules={[{required: true, message: 'Please input your Last Name!'}]}
-              name={'playerHandicap'}
-              hasFeedback
-            >
-              <Input
-                placeholder='Enter Last Player Handicap'
-                value={editCaddyDetails?.playerHandicap}
-                type='number'
-                style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-              />
-            </Form.Item>
-            <Form.Item
-              label='GGAID'
-              rules={[{required: true, message: 'Please input your GGAID!'}]}
-              name={'ggaid'}
-              hasFeedback
-            >
-              <Input
-                placeholder='Enter your GGAID'
-                value={editCaddyDetails?.ggaid}
-                style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-              />
-            </Form.Item>
-            <Form.Item
-              label='Status'
-              rules={[{required: true, message: 'Please enter your status!'}]}
-              name={'status'}
-              hasFeedback
-            >
-              <Input
-                placeholder='Enter Satus'
-                value={editCaddyDetails?.status}
-                style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-              />
-            </Form.Item>
+
             <Form.Item
               label='Picture'
               // rules={[{required: true, message: 'Please upload file!'}]}
@@ -260,7 +264,7 @@ export function CaddiesTable() {
             >
               <Input
                 placeholder='Enter Satus'
-                value={editCaddyDetails?.status}
+                value=''
                 type='file'
                 style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
               />

@@ -21,6 +21,9 @@ export const addCaddiesApi:any=(data:any)=>{
 export const getAllCaddiesApi:any=()=>{
   return axios.get(`${API_URL}/Caddies`)
 }
+export const updateCaddyApi:any=(data:any)=>{
+  return axios.put(`${API_URL}/Caddies/${data.id}`, data)
+}
 // export const fetchDataperDate=(teeDate:string)=>{
 //   axios.get(`${API_URL}/CellCount/${teeDate}`).then(res=>console.log('data',res.data)).catch((error)=>{
 //     console.log(error.response.data.error)
