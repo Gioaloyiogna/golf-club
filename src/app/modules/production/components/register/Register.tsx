@@ -327,6 +327,7 @@ const Register = () => {
                     onFinish={onFinish}
                     {...layout}
                     name='control-hooks'
+                    
                   >
                     <Form.Item hidden={true} name={'id'} hasFeedback>
                       <Input value={editMemberDetails?.id} disabled={false} type='hidden' />

@@ -1,13 +1,19 @@
 import {useState} from 'react'
 import {Link} from 'react-router-dom'
-import {Upload} from 'antd'
+import {Form, Modal, Upload, message} from 'antd'
 import {UploadOutlined} from '@ant-design/icons'
 import {RcFile, UploadFile, UploadProps} from 'antd/es/upload/interface'
+import {useMutation, useQuery} from 'react-query'
+import axios from 'axios'
+import {API_URL} from '../../../../../../urls'
+import {addCaddiesApi} from '../../../Requests'
 // import "./formStyle.css"
 
 const AddCourseSetup = () => {
   const [formData, setFormData] = useState({})
   const [activeTab, setActiveTab] = useState('tab1')
+  const [form] = Form.useForm()
+  const {mutate: addCaddies} = useMutation((values: any) => addCaddiesApi(values))
 
   const handleTabClick = (tab: any) => {
     setActiveTab(tab)
@@ -17,10 +23,27 @@ const AddCourseSetup = () => {
     setFormData({...formData, [event.target.name]: event.target.value})
   }
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault()
-    console.log(formData)
-    // Use the formData object to submit the data to your server
+  const handleSubmit = () => {
+    //Modal to confirm caddies submission
+    Modal.confirm({
+      okText: 'Yes',
+      okType: 'danger',
+      title: 'Are you sure, you want to add this caddy?',
+      onOk: () => {
+        addCaddies(formData, {
+          onSuccess: () => {
+            // setIsEditing(false)
+            form.resetFields()
+            message.success('Caddy added successfully')
+            //queryClient.invalidateQueries('membersQuery')
+          },
+          onError: (error: any) => {
+            message.error('Failed to add Member')
+            console.log(error.message)
+          },
+        })
+      },
+    })
   }
 
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -61,7 +84,18 @@ const AddCourseSetup = () => {
           Back to Caddies List
         </a>
       </Link>
-      <form onSubmit={handleSubmit}>
+      <Form
+        onFinish={handleSubmit}
+        form={form}
+        initialValues={{
+          Fname: '',
+          Lname: '',
+          handicap: '',
+          Phone: '',
+          Address: '',
+          gender: '',
+        }}
+      >
         <div>
           <div className='row mb-0'>
             <div className='col-6 mb-7'>
@@ -70,6 +104,7 @@ const AddCourseSetup = () => {
                 fileList={fileList}
                 onChange={onChange}
                 onPreview={onPreview}
+                name='Picture'
               >
                 <UploadOutlined />
               </Upload>
@@ -81,19 +116,8 @@ const AddCourseSetup = () => {
                 Code
               </label>
               <input
-                type='number'
-                name='hole'
-                onChange={handleChange}
-                className='form-control form-control-solid'
-              />
-            </div>
-            <div className='col-6 mb-7'>
-              <label htmlFor='exampleFormControlInput1' className='required form-label'>
-                Date Of Birth
-              </label>
-              <input
-                type='date'
-                name='yard'
+                type='text'
+                name='Code'
                 onChange={handleChange}
                 className='form-control form-control-solid'
               />
@@ -106,7 +130,7 @@ const AddCourseSetup = () => {
               </label>
               <input
                 type='text'
-                name='par'
+                name='Fname'
                 onChange={handleChange}
                 className='form-control form-control-solid'
               />
@@ -117,7 +141,7 @@ const AddCourseSetup = () => {
               </label>
               <input
                 type='text'
-                name='handicap'
+                name='Lname'
                 onChange={handleChange}
                 className='form-control form-control-solid'
               />
@@ -129,7 +153,7 @@ const AddCourseSetup = () => {
                 Email
               </label>
               <input
-                type='email'
+                type='Email'
                 name='handicap'
                 onChange={handleChange}
                 className='form-control form-control-solid'
@@ -141,7 +165,7 @@ const AddCourseSetup = () => {
               </label>
               <input
                 type='tel'
-                name='handicap'
+                name='Phone'
                 onChange={handleChange}
                 className='form-control form-control-solid'
               />
@@ -154,18 +178,19 @@ const AddCourseSetup = () => {
               </label>
               <input
                 type='text'
-                name='handicap'
+                name='Address'
                 onChange={handleChange}
                 className='form-control form-control-solid'
               />
             </div>
+
             <div className='col-6 mb-7'>
               <label htmlFor='exampleFormControlInput1' className='required form-label'>
                 Gender
               </label>
               <input
                 type='text'
-                name='handicap'
+                name='gender'
                 onChange={handleChange}
                 className='form-control form-control-solid'
               />
@@ -175,7 +200,7 @@ const AddCourseSetup = () => {
         <button className='btn btn-primary' type='submit'>
           Submit
         </button>
-      </form>
+      </Form>
     </div>
   )
 }

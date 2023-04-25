@@ -15,6 +15,9 @@ export const getPlayerMembers: any = (chosenTime: string) => {
     return axios.get(`${API_URL}/TeeSlots/${chosenTime}`)
   }
 }
+export const addCaddiesApi:any=(data:any)=>{
+   return axios.post(`${API_URL}/Caddies`, data)
+}
 // export const fetchDataperDate=(teeDate:string)=>{
 //   axios.get(`${API_URL}/CellCount/${teeDate}`).then(res=>console.log('data',res.data)).catch((error)=>{
 //     console.log(error.response.data.error)
