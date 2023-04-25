@@ -2,10 +2,15 @@ import {Button, Input, Space, Table} from 'antd'
 import {Link, Route, Routes} from 'react-router-dom'
 import {useState} from 'react'
 import {KTCard, KTCardBody, KTSVG} from '../../../../../../../_metronic/helpers'
+import { useQuery } from 'react-query'
+import { getAllCaddiesApi } from '../../../Requests'
+import { render } from 'react-dom'
+
 
 const columns: any = [
   {
     title: 'Picture',
+    dataIndex: 'picture'
   },
   {
     title: 'Code',
@@ -18,6 +23,7 @@ const columns: any = [
       }
       return 0
     },
+    dataIndex: 'code'
   },
   {
     title: 'Fist Name',
@@ -30,28 +36,53 @@ const columns: any = [
       }
       return 0
     },
+    dataIndex: 'fname'
   },
   {},
   {
     title: 'Last Name',
     sorter: (a: any, b: any) => a.downTime - b.downTime,
+    dataIndex: 'lname'
   },
   {
     title: 'Email',
+    dataIndex: 'email'
   },
   {
     title: 'Phone',
+    dataIndex: 'phone'
   },
   {
     title: 'Address',
+    dataIndex: 'address'
   },
   {
     title: 'Gender',
+    dataIndex: 'gender'
   },
+  {
+    title: 'Actions',
+    render: (record:any)=>{
+      return (
+        <>
+        <Space size='middle'>
+        <a href="#" className='btn btn-light-warning btn-sm'>Update</a>
+        <a href="#" className='btn btn-light-primary btn-sm'>Activate</a>
+        <a href="#" className='btn btn-light-danger btn-sm'>Deactivate</a>
+      </Space>
+        </>
+      )
+      }
+      
+  }
+  
 ]
 
 export function CaddiesTable() {
   const [loading, setLoading] = useState(false)
+  const {data:getAllCaddies, isLoading}=useQuery('caddiesQuery', ()=>getAllCaddiesApi())
+  console.log(getAllCaddies);
+  
 
   return (
     <KTCard>
@@ -76,7 +107,7 @@ export function CaddiesTable() {
             </Link>
           </Space>
         </div>
-        <Table columns={columns} bordered loading={loading} />
+        <Table    className='table-responsive' columns={columns} bordered loading={loading} dataSource={getAllCaddies?.data} />
       </KTCardBody>
     </KTCard>
   )

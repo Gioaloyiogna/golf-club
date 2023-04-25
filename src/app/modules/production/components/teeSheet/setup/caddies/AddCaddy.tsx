@@ -33,22 +33,12 @@ const AddCourseSetup = () => {
         addCaddies(formData, {
           onSuccess: () => {
             // setIsEditing(false)
-           
-            // form.setFieldValue(
-            //   {
-            //     Fname: '',
-            //     Lname: '',
-            //     handicap: '',
-            //     Phone: '',
-            //     Address: '',
-            //     gender: '',
-              
-            // })
+            form.resetFields()
             message.success('Caddy added successfully')
             //queryClient.invalidateQueries('membersQuery')
           },
           onError: (error: any) => {
-            message.error('Failed to add Member')
+            message.error('Email or code already exists!')
             console.log(error.message)
           },
         })
@@ -89,7 +79,7 @@ const AddCourseSetup = () => {
         boxShadow: '2px 2px 15px rgba(0,0,0,0.08)',
       }}
     >
-      <Link to='/setup/course-setup'>
+      <Link to='/setup/caddies'>
         <a style={{fontSize: '16px', fontWeight: '500'}} className='btn btn-primary btn-sm mb-7'>
           Back to Caddies List
         </a>

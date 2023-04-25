@@ -106,6 +106,7 @@ const Register = () => {
     {
       title: 'Phone Number',
       dataIndex: 'phone',
+      
     },
     {
       title: 'Email',
