@@ -33,7 +33,17 @@ const AddCourseSetup = () => {
         addCaddies(formData, {
           onSuccess: () => {
             // setIsEditing(false)
-            form.resetFields()
+           
+            // form.setFieldValue(
+            //   {
+            //     Fname: '',
+            //     Lname: '',
+            //     handicap: '',
+            //     Phone: '',
+            //     Address: '',
+            //     gender: '',
+              
+            // })
             message.success('Caddy added successfully')
             //queryClient.invalidateQueries('membersQuery')
           },
