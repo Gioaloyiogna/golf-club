@@ -25,7 +25,7 @@ const Register = () => {
   const [messageApi, contextHolder] = message.useMessage()
   const [isEditing, setIsEditing] = useState(false)
   const [editMemberDetails, setEditMemberDetails] = useState<any>(null)
-  const [editnewMemberDetails, setEditnewMemberDetails] = useState<any>(null)
+  const [, setEditnewMemberDetails] = useState<any>(null)
   const {mutate: upDateMember} = useMutation((data: any) =>
     axios.put(`${API_URL}/members/${data.id}`, data)
   )
@@ -137,6 +137,13 @@ const Register = () => {
       render: (record: any) => {
         return (
           <>
+            
+        <Space size='middle'>
+        <a href="#" className='btn btn-light-warning btn-sm' onClick={() => editMember(record)}>Update</a>
+        <a href="#" className='btn btn-light-primary btn-sm' onClick={() => activateUser(record.id)}>Activate</a>
+        <a href="#" className='btn btn-light-danger btn-sm'>Deactivate</a>
+      </Space>
+{/*         
             <div className='d-flex justify-content-around'>
               <button
                 className='bg-success border-0  text-white mx-1 d-flex flex-column justify-content-center p-2'
@@ -158,7 +165,8 @@ const Register = () => {
                 <CloseCircleOutlined title='Suspend' />
               </button>
             </div>
-          </>
+            */}
+          </> 
         )
       },
     },
@@ -339,7 +347,7 @@ const Register = () => {
                       name={'fname'}
                       hasFeedback
                     >
-                      <Input value={editMemberDetails?.fname} disabled={false} />
+                      <Input value={editMemberDetails?.fname} disabled={false}    style={{color:'gray', fontSize:"0.9rem"}} />
                     </Form.Item>
                     <Form.Item
                       label='Last Name'
@@ -347,7 +355,7 @@ const Register = () => {
                       name={'lname'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter Last Name' value={editMemberDetails?.lname} />
+                      <Input placeholder='Enter Last Name' value={editMemberDetails?.lname} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}}   />
                     </Form.Item>
 
                     <Form.Item
@@ -356,7 +364,7 @@ const Register = () => {
                       name={'email'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter Email' value={editMemberDetails?.email} />
+                      <Input placeholder='Enter Email' value={editMemberDetails?.email} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} />
                     </Form.Item>
                     <Form.Item
                       label='Gender'
@@ -364,7 +372,7 @@ const Register = () => {
                       name={'gender'}
                       hasFeedback
                     >
-                      <Input placeholder='input placeholder' value={editMemberDetails?.gender} />
+                      <Input placeholder='input placeholder' value={editMemberDetails?.gender} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} />
                     </Form.Item>
                     <Form.Item
                       label='Date OF Birth'
@@ -376,6 +384,7 @@ const Register = () => {
                         placeholder='Enter Last Name'
                         defaultValue={editMemberDetails?.DOB}
                         type='date'
+                        style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} 
                       />
                     </Form.Item>
                     <Form.Item
@@ -388,6 +397,7 @@ const Register = () => {
                         placeholder='Enter Last Player Handicap'
                         value={editMemberDetails?.playerHandicap}
                         type='number'
+                        style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} 
                       />
                     </Form.Item>
                     <Form.Item
@@ -396,7 +406,7 @@ const Register = () => {
                       name={'ggaid'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter your GGAID' value={editMemberDetails?.ggaid} />
+                      <Input placeholder='Enter your GGAID' value={editMemberDetails?.ggaid} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}}   />
                     </Form.Item>
                     <Form.Item
                       label='Status'
@@ -404,7 +414,7 @@ const Register = () => {
                       name={'status'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter Satus' value={editMemberDetails?.status} />
+                      <Input placeholder='Enter Satus' value={editMemberDetails?.status} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} />
                     </Form.Item>
                     <Form.Item
                       label='Picture'
@@ -416,6 +426,8 @@ const Register = () => {
                         placeholder='Enter Satus'
                         value={editMemberDetails?.status}
                         type='file'
+                        style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} 
+                      
                       />
                     </Form.Item>
                     <Form.Item {...tailLayout}>
