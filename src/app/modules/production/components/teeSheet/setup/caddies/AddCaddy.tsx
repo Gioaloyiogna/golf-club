@@ -90,7 +90,7 @@ const AddCourseSetup = () => {
         initialValues={{
           Fname: '',
           Lname: '',
-          handicap: '',
+          Email: '',
           Phone: '',
           Address: '',
           gender: '',
@@ -153,8 +153,8 @@ const AddCourseSetup = () => {
                 Email
               </label>
               <input
-                type='Email'
-                name='handicap'
+                type='email'
+                name='email'
                 onChange={handleChange}
                 className='form-control form-control-solid'
               />
