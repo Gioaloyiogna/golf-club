@@ -1118,7 +1118,7 @@ const TeeSheet = () => {
                           {members?.map((member: any) => (
                             <Option key={member.id} value={member.id}>
                               {member.fname}
-                              {member.lname}-{member.ggaid}
+                              {member.lname}-{member.code}
                             </Option>
                           ))}
                         </Select>
