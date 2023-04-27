@@ -4,7 +4,7 @@ import * as Yup from 'yup'
 import clsx from 'clsx'
 import {Link} from 'react-router-dom'
 import {useFormik} from 'formik'
-import {getUserByToken, login} from '../core/_requests'
+import {login, parseJwt} from '../core/_requests'
 import {useAuth} from '../core/Auth'
 
 const loginSchema = Yup.object().shape({
@@ -42,7 +42,7 @@ export function Login() {
       try {
         const {data: auth} = await login(values)
         saveAuth(auth)
-        const {data: user} = await getUserByToken(auth.api_token)
+        const {data: user} = await parseJwt(auth.api_token)
         setCurrentUser(user)
       } catch (error) {
         console.error(error)
