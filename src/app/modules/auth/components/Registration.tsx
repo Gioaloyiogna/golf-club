@@ -3,7 +3,7 @@ import {useEffect, useState} from 'react'
 import {useFormik} from 'formik'
 import * as Yup from 'yup'
 import clsx from 'clsx'
-import {getUserByToken, register} from '../core/_requests'
+import { parseJwt, register} from '../core/_requests'
 import {Link} from 'react-router-dom'
 import {toAbsoluteUrl} from '../../../../_metronic/helpers'
 import {PasswordMeterComponent} from '../../../../_metronic/assets/ts/components'
@@ -62,7 +62,7 @@ export function Registration() {
           values.changepassword
         )
         saveAuth(auth)
-        const {data: user} = await getUserByToken(auth.api_token)
+        const {data: user} = await parseJwt(auth.api_token)
         setCurrentUser(user)
       } catch (error) {
         console.error(error)
