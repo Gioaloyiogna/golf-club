@@ -13,15 +13,13 @@ const loginSchema = Yup.object().shape({
     .min(3, 'Minimum 3 symbols')
     .max(50, 'Maximum 50 symbols')
     .required('ID is required'),
-  password: Yup.string()
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
-    .required('Password is required'),
+  code: Yup.string().required('Code is required'),
 })
 
 const initialValues = {
   email: 'User ID',
-  password: 'admin',
+  code: 'admin',
+  role: 'caddy',
 }
 
 /*
@@ -38,9 +36,11 @@ export function Login() {
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, {setStatus, setSubmitting}) => {
+      console.log(values)
+
       setLoading(true)
       try {
-        const {data: auth} = await login(values.email, values.password)
+        const {data: auth} = await login(values)
         saveAuth(auth)
         const {data: user} = await getUserByToken(auth.api_token)
         setCurrentUser(user)
@@ -78,7 +78,18 @@ export function Login() {
           <div className='alert-text font-weight-bold'>{formik.status}</div>
         </div>
       ) : null}
-
+      {/* begin::Form group */}
+      <div className='fv-row mb-10'>
+        <input
+          hidden={true}
+          placeholder='User ID'
+          value='caddy'
+          type='text'
+          name='role'
+          autoComplete='off'
+        />
+      </div>
+      {/* end::Form group */}
       {/* begin::Form group */}
       <div className='fv-row mb-10'>
         <label className='form-label fs-6 fw-bolder text-dark'>USER ID</label>
@@ -109,7 +120,7 @@ export function Login() {
         <div className='d-flex justify-content-between mt-n5'>
           <div className='d-flex flex-stack mb-2'>
             {/* begin::Label */}
-            <label className='form-label fw-bolder text-dark fs-6 mb-0'>Password</label>
+            <label className='form-label fw-bolder text-dark fs-6 mb-0'>CODE</label>
             {/* end::Label */}
             {/* begin::Link */}
             <Link
@@ -117,7 +128,7 @@ export function Login() {
               className='fs-6 fw-bolder'
               style={{marginLeft: '5px', color: '#09e85e !important'}}
             >
-              Forgot Password ?
+              Forgot Code ?
             </Link>
             {/* end::Link */}
           </div>
@@ -125,21 +136,21 @@ export function Login() {
         <input
           type='password'
           autoComplete='off'
-          {...formik.getFieldProps('password')}
+          {...formik.getFieldProps('code')}
           className={clsx(
             'form-control form-control-lg form-control-solid',
             {
-              'is-invalid': formik.touched.password && formik.errors.password,
+              'is-invalid': formik.touched.code && formik.errors.code,
             },
             {
-              'is-valid': formik.touched.password && !formik.errors.password,
+              'is-valid': formik.touched.code && !formik.errors.code,
             }
           )}
         />
-        {formik.touched.password && formik.errors.password && (
+        {formik.touched.code && formik.errors.code && (
           <div className='fv-plugins-message-container'>
             <div className='fv-help-block'>
-              <span role='alert'>{formik.errors.password}</span>
+              <span role='alert'>{formik.errors.code}</span>
             </div>
           </div>
         )}

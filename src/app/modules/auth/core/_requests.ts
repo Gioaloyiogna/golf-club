@@ -10,10 +10,9 @@ export const REGISTER_URL = `${API_URL}/register`
 export const REQUEST_PASSWORD_URL = `${API_URL}/forgot_password`
 
 // Server should return AuthModel
-export function login(email: string, password: string) {
+export function login(values:any) {
   return axios.post<AuthModel>(LOGIN_URL, {
-    email,
-    password,
+    values
   })
 }
 
