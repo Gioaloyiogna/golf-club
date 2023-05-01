@@ -2,8 +2,10 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import Hole from './Hole';
 import {KTCard} from "../../../../../_metronic/helpers";
+import { API_URL, BASE_URL } from '../../../../urls';
 
 const ScoreBoard = () => {
+    
     // const [loading, setLoading] = useState(false);
     // const [course, setCourse] = useState(null);
     //
@@ -84,9 +86,11 @@ const ScoreBoard = () => {
     // )
     const [data, setData] = useState([]);
     async function fetchData() {
-        const data = await axios.get('tees.json');
-        setData(data.data.tees[0].holes);
+        const data = await axios.get(`${API_URL}/Holestbls`);
+       
+        setData(data.data);
     }
+    console.log(data);
 
     useEffect(() => {
         fetchData();
@@ -102,9 +106,9 @@ const ScoreBoard = () => {
                     <thead className="border">
                     <tr className="fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200">
                         <th className="min-w-50px bg-secondary"></th>
-                        {data.map((item) => {
+                        {data?.map((item) => {
                             return (
-                                <th className="min-w-100px bg-secondary" key={item.number}>Hole {item.number}</th>
+                                <th className="min-w-100px bg-secondary" key={item.id}>Hole {item.holeNumber}</th>
                             )
                         })}
                         <th className="min-w-100px bg-secondary">Total</th>
@@ -115,29 +119,29 @@ const ScoreBoard = () => {
                     >
                     <tr>
                         <th className="fw-bold fs-6 text-gray-800 bg-primary">Yards</th>
-                        {data.map((item) => {
+                        {data?.map((item) => {
                             let total = 0;
                             return (
                                 <>
-                                    <td className={'bg-primary'} key={item.number}>{item.yards}</td>
+                                    <td className={'bg-primary'} key={item.id}>{item.yardage}</td>
                                 </>
                             )
                         })}
                         <td className={'bg-primary'}>
-                            {data.reduce((total, item) => {
-                                return total + Number(item.yards)
+                            {data?.reduce((total, item) => {
+                                return total + Number(item.yardage)
                             }, 0)}
                         </td>
                     </tr>
                     <tr>
                         <th className="fw-bold fs-6 text-gray-800 bg-success">Par</th>
-                        {data.map((item) => {
+                        {data?.map((item) => {
                             return (
-                                <td className={'bg-success'} key={item.number}>{item.par}</td>
+                                <td className={'bg-success'} key={item.id}>{item.par}</td>
                             )
                         })}
                         <td className={'bg-success'}>
-                            {data.reduce((total, item) => {
+                            {data?.reduce((total, item) => {
                                 return total + Number(item.par)
                             }, 0)}
                         </td>
@@ -146,7 +150,7 @@ const ScoreBoard = () => {
                         <th className="fw-bold fs-6 text-gray-800">Stroke</th>
                         {data.map((item) => {
                             return (
-                                <td contentEditable={true} key={item.number}>{item.stroke}</td>
+                                <td contentEditable={true} key={item.id}>{item.stroke}</td>
                             )
                         }   )}
                     </tr>

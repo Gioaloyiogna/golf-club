@@ -143,29 +143,6 @@ const Register = () => {
         <a href="#" className='btn btn-light-primary btn-sm' onClick={() => activateUser(record.id)}>Activate</a>
         <a href="#" className='btn btn-light-danger btn-sm'>Deactivate</a>
       </Space>
-{/*         
-            <div className='d-flex justify-content-around'>
-              <button
-                className='bg-success border-0  text-white mx-1 d-flex flex-column justify-content-center p-2'
-                onClick={() => editMember(record)}
-              >
-                <EditOutlined title='Edit' />
-              </button>
-
-              <button
-                className='bg-primary border-0 text-white mx-1  d-flex flex-column justify-content-center  p-2'
-                onClick={() => activateUser(record.id)}
-              >
-                <CheckOutlined title='Activate' />
-              </button>
-              <button
-                className='bg-danger border-0 text-white mx-1  d-flex flex-column justify-content-center  p-2'
-                onClick={() => deactivateUser(record.id)}
-              >
-                <CloseCircleOutlined title='Suspend' />
-              </button>
-            </div>
-            */}
           </> 
         )
       },

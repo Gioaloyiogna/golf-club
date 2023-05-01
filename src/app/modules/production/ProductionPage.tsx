@@ -15,6 +15,7 @@ import {GameTypeTable} from './components/teeSheet/setup/GameTypeTable'
 import {AddGameTypeSetup} from './components/teeSheet/setup/AddGameTypeSetup'
 import {ScoreBoard} from './components/scoreBoard/ScoreBoard'
 import {Course, CourseList} from './components/teeSheet/setup/CourseSetup'
+import {ScoreBoardMain} from './components/scoreBoard/scoreboardMain'
 const accountBreadCrumbs: Array<PageLink> = []
 
 const ProductionPage: React.FC = () => {
@@ -53,6 +54,15 @@ const ProductionPage: React.FC = () => {
         element={
           <>
             <PageTitle breadcrumbs={accountBreadCrumbs}>Gameplay</PageTitle>
+            <ScoreBoardMain />
+          </>
+        }
+      />
+      <Route
+        path='/score/:id*'
+        element={
+          <>
+            <PageTitle breadcrumbs={accountBreadCrumbs}>Score Board </PageTitle>
             <ScoreBoard />
           </>
         }
@@ -103,10 +113,7 @@ const ProductionPage: React.FC = () => {
               </>
             }
           />
-            <Route
-                path='view/:id'
-              element={<CourseList />}
-            />
+          <Route path='view/:id' element={<CourseList />} />
         </Route>
         <Route
           path='fees/*'

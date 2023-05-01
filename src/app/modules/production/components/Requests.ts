@@ -5,7 +5,9 @@ import {API_URL} from '../../../urls'
 export const getMembers: any = () => {
   return axios.get(`${API_URL}/members`)
 }
-
+export const getPlayers: any = () => {
+  return axios.get(`${API_URL}/TeeSlots`)
+}
 export const postMember: any = (data: any) => {
   return axios.post(`${API_URL}/members`, data)
 }
@@ -15,15 +17,29 @@ export const getPlayerMembers: any = (chosenTime: string) => {
     return axios.get(`${API_URL}/TeeSlots/${chosenTime}`)
   }
 }
+export const getCaddyPerTeeApi: any = (chosenTime: string) => {
+  if (chosenTime != '') {
+    return axios.get(`${API_URL}/CaddyTeeSlots/${chosenTime}`)
+  }
+}
+
 export const addCaddiesApi:any=(data:any)=>{
    return axios.post(`${API_URL}/Caddies`, data)
 }
-export const getAllCaddiesApi:any=()=>{
+export const getAllCaddiesApi=()=>{
   return axios.get(`${API_URL}/Caddies`)
 }
 export const updateCaddyApi:any=(data:any)=>{
   return axios.put(`${API_URL}/Caddies/${data.id}`, data)
 }
+export const updateCaddySlotsApi:any=(data:any)=>{
+  return axios.put(`${API_URL}/CaddyTeeSlots/${data.teeTime}`, data)
+}
+ 
+export const getAllTees= () => {
+  return axios.get(`${API_URL}/GameTeeSlots`)
+}
+
 // export const fetchDataperDate=(teeDate:string)=>{
 //   axios.get(`${API_URL}/CellCount/${teeDate}`).then(res=>console.log('data',res.data)).catch((error)=>{
 //     console.log(error.response.data.error)

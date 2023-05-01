@@ -16,7 +16,7 @@ import TabPane from 'antd/es/tabs/TabPane'
 import {log} from 'console'
 
 import {query} from 'express'
-import {fetchTees, getPlayerMembers} from '../Requests'
+import {fetchTees, getAllCaddiesApi, getCaddyPerTeeApi, getPlayerMembers, updateCaddyApi, updateCaddySlotsApi} from '../Requests'
 
 const teeSlot = [
   ['T06:00:00Z', 'T06:10:00Z', 'T06:20:00Z', 'T06:30:00Z', 'T06:40:00Z', 'T06:50:00Z'],
@@ -55,6 +55,31 @@ const columns = [
     key: 'availabilityStatus',
   },
 ]
+// caddies columns
+const caddyColumns = [
+  {
+    title: 'Code',
+     dataIndex:'code', 
+    // render: () => <a>{text}</a>,
+  },
+  {
+    title: 'Name',
+     dataIndex:'fname', 
+    // render: () => <a>{text}</a>,
+  },
+  {
+    title: 'Email',
+    dataIndex:'email', 
+  },
+  {
+    title: 'Gender',
+    dataIndex:'gender', 
+  },
+  {
+    title: 'Address',
+    datIndex:'address', 
+  },
+]
 const TeeSheet = () => {
   useEffect(() => {
     axios.get(`${API_URL}/members`).then((res) => {
@@ -68,9 +93,14 @@ const TeeSheet = () => {
   const [open, setOpen] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [members, setMembers] = useState<any>()
-
+  const {data:allCaddies}=useQuery('caddiesQuery', getAllCaddiesApi)
+  
+  const {data: allTees} = useQuery('tees', fetchTees)
   const {mutate: addMember} = useMutation((values: any) =>
     axios.post(`${API_URL}/TeeSlots`, values)
+  )
+  const {mutate: updateCaddy} = useMutation((values: any) =>
+  updateCaddySlotsApi(values)
   )
   const {mutate: addNonMember} = useMutation((values: any) =>
     axios.post(`${API_URL}/NonMemberTeeSlots`, values)
@@ -81,9 +111,19 @@ const TeeSheet = () => {
   const [chosenTimeNotLate, setChosenTimeNotLate] = useState('')
   const [cellSelectedDate, setcellSelectedDate] = useState('')
   const [slotData, setSlotData] = useState<any>([])
+  const caddyArray=[]
   const {data: playerMembers, isLoading} = useQuery(['membersQuery', chosenTimeNotLate], () =>
     getPlayerMembers(chosenTimeNotLate)
   )
+  const {data: getCaddyPerTee} = useQuery(['getCaddyPerteeQuery', chosenTimeNotLate], () =>
+  getCaddyPerTeeApi(chosenTimeNotLate)
+  )
+  caddyArray.push(getCaddyPerTee?.data)
+
+
+
+  
+
   var counter = 6
   const [SlotsNumber, setSlotsNumber] = useState<any>([])
 
@@ -94,6 +134,15 @@ const TeeSheet = () => {
     teeTime: '',
     playerName: 'Giovanni',
     availabilityStatus: 'yes',
+    caddyId: 0,
+  })
+  const [caddyData, setCaddyData]=useState({
+    memberId: 0,
+    playerType: '',
+    playerEmail: '',
+    teeTime: '',
+    playerName: '',
+    availabilityStatus: '',
     caddyId: 0,
   })
   const [selectedDate, setSelectedDate] = useState<string>()
@@ -147,6 +196,35 @@ const TeeSheet = () => {
     )}`
     setFormData({...formData, memberId: value, teeTime: teeTime})
   }
+  const handleOnChangeCaddy = (value: any) => {
+    var teeTime = `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString(
+      'en-US',
+      {hour12: false, hour: '2-digit', minute: '2-digit'}
+    )}`
+    setCaddyData({...caddyData, caddyId: value, teeTime: teeTime})
+     
+    
+    
+  }
+ 
+ useEffect(() => {
+  if (caddyData.teeTime !=='' ) {
+    updateCaddy(caddyData, {
+      onSuccess: () => {
+        // setIsEditing(false)
+
+        message.success('Caddy added successfully')
+        queryClient.invalidateQueries('getCaddyPerteeQuery')
+        queryClient.invalidateQueries('tees')
+        form.resetFields()
+      },
+      onError: (error: any) => {
+        message.error('Failed to add Caddy')
+        console.log(error.message)
+      },
+    })
+  }
+}, [caddyData])
 
   const onFinish = (values: any) => {
     // var MemberFormData = new FormData()
@@ -154,12 +232,7 @@ const TeeSheet = () => {
       'en-US',
       {hour12: false, hour: '2-digit', minute: '2-digit'}
     )}`
-    // MemberFormData.append('playerType', 'Non-Member')
-    // MemberFormData.append('playerEmail', values.playerEmail)
-    // MemberFormData.append('teeTime', teeTime)
-    // MemberFormData.append('playerName', values.playerName)
-    // MemberFormData.append('availabilityStatus', 'yes')
-    // MemberFormData.append('caddyId', '0')
+   
     values.teeTime = teeTime
     values.playerType = 'Non-member'
     values.availabilityStatus = 'yes'
@@ -237,7 +310,7 @@ const TeeSheet = () => {
   //     {hour12: false, hour: '2-digit', minute: '2-digit'}
   //   )}` )
   // }
-  const {data: allTees} = useQuery('tees', fetchTees)
+ 
 
   // cell per date
 
@@ -1111,7 +1184,7 @@ const TeeSheet = () => {
                         rules={[{required: true, message: 'Missing Host'}]}
                       >
                         <Select
-                          placeholder='Select Host'
+                          placeholder='Select Member'
                           // onChange={(value) => memberOnChange(value)}
                           onChange={handleOnChange}
                         >
@@ -1189,6 +1262,35 @@ const TeeSheet = () => {
                       className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
                       dataSource={playerMembers?.data}
                     />
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab='Caddy' key='Caddy'>
+                    <Form form={form}>
+                      <Form.Item
+                        name='caddyId'
+                        label='Caddy'
+                        rules={[{required: true, message: 'Missing Caddy'}]}
+                      >
+                        <Select
+                          placeholder='Select Caddy'
+                          // onChange={(value) => memberOnChange(value)}
+                          onChange={handleOnChangeCaddy}
+                        >
+                          {allCaddies?.data.map((caddy: any) => (
+                            <Option key={caddy.id} value={caddy.id}>
+                              {caddy.fname}
+                              {caddy.lname}-{caddy.code}
+                            </Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Form>
+                    
+                    <Table
+                      columns={caddyColumns}
+                      dataSource={caddyArray}
+                      className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
+                    />
+                    
                   </Tabs.TabPane>
                 </Tabs>
 
