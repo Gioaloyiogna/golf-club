@@ -11,8 +11,10 @@ import {
 import {LayoutSplashScreen} from '../../../../_metronic/layout/core'
 import {AuthModel, UserModel} from './_models'
 import * as authHelper from './AuthHelpers'
-import { parseJwt} from './_requests'
+// import {getUserByToken} from './_requests'
 import {WithChildren} from '../../../../_metronic/helpers'
+import { getUserByToken } from './_requests'
+
 
 type AuthContextProps = {
   auth: AuthModel | undefined
@@ -69,7 +71,8 @@ const AuthInit: FC<WithChildren> = ({children}) => {
     const requestUser = async (apiToken: string) => {
       try {
         if (!didRequest.current) {
-          const data = await parseJwt(apiToken)
+          //const data = parseJwt(apiToken)
+           const {data} = await getUserByToken(apiToken)
           if (data) {
             setCurrentUser(data)
           }
