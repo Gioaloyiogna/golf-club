@@ -34,8 +34,10 @@ const ScoreBoardMain = () => {
   let index = 0
   teeSlotData?.data.filter((item: any) => {
     const itemDate = new Date(item)
+    const today = new Date(Date.now())
+    console.log('today', today)
     console.log('week', oneWeekAgo)
-    if (itemDate >= oneWeekAgo) {
+    if (itemDate >= oneWeekAgo && itemDate < today) {
       teeTimeArrayData.push({
         teeTime: itemDate.toLocaleString('en-US', {
           weekday: 'long',
@@ -69,7 +71,7 @@ const ScoreBoardMain = () => {
       },
     },
     {
-      title: 'Members',
+      title: 'Players',
       render: (record: any) => {
         const players = playersArray[record.dataIndex] || []
         return players.map((player: any) => {
@@ -90,8 +92,8 @@ const ScoreBoardMain = () => {
       render: (record: any) => {
         // let datee=record.
         // console.log(record.teeTime.toDateString())
+
         return (
-             
           <>
             <Space size='middle'>
               <a href={`/score/${2}`} className='btn btn-light-warning btn-sm'>
@@ -193,7 +195,7 @@ const ScoreBoardMain = () => {
 
   return (
     <>
-      <PageTitle>GamePlay</PageTitle>
+      <PageTitle>ScoreBoard</PageTitle>
       <KTCard>
         <KTCardBody>
           <div className='d-flex justify-content-between'>

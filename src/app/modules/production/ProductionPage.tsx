@@ -53,7 +53,7 @@ const ProductionPage: React.FC = () => {
         path='/gameplay/*'
         element={
           <>
-            <PageTitle breadcrumbs={accountBreadCrumbs}>Gameplay</PageTitle>
+            <PageTitle breadcrumbs={accountBreadCrumbs}>ScoreBoard</PageTitle>
             <ScoreBoardMain />
           </>
         }
@@ -62,7 +62,7 @@ const ProductionPage: React.FC = () => {
         path='/score/:id*'
         element={
           <>
-            <PageTitle breadcrumbs={accountBreadCrumbs}>Score Board </PageTitle>
+            <PageTitle breadcrumbs={accountBreadCrumbs}>ScoreBoard </PageTitle>
             <ScoreBoard />
           </>
         }

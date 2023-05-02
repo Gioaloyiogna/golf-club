@@ -35,7 +35,7 @@ export function AsideMenuMain() {
         to='gameplay'
         fontIcon='bi-archive'
         icon='/media/icons/duotune/communication/com001.svg'
-        title='Gameplay'
+        title='ScoreBoard'
       />
       <AsideMenuItem
         to='shop'

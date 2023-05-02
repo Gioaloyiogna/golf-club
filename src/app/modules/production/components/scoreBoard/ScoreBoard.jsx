@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import Hole from './Hole';
+
 import {KTCard} from "../../../../../_metronic/helpers";
 import { API_URL, BASE_URL } from '../../../../urls';
 
