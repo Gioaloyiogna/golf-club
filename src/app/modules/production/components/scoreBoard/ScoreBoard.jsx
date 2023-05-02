@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 
 import {KTCard} from "../../../../../_metronic/helpers";
 import { API_URL, BASE_URL } from '../../../../urls';
+import { useQuery } from 'react-query';
+import { getPlayers } from '../Requests';
+import { useParams } from 'react-router-dom';
 
 const ScoreBoard = () => {
     
@@ -85,6 +88,16 @@ const ScoreBoard = () => {
     //   </div>
     // )
     const [data, setData] = useState([]);
+    const {data:playerNamesFromApi}=useQuery('playersQuery', ()=> getPlayers())
+     const {time}=useParams()
+    const date1=time.slice(0, 10);
+    const data2=time.slice(10,14)
+    console.log(data2);
+   
+    const playerNames=playerNamesFromApi?.data.filter((item)=>{
+        return item.teeTime ==="2023-04-21 06:00"
+    })
+ 
     async function fetchData() {
         const data = await axios.get(`${API_URL}/Holestbls`);
        
@@ -146,14 +159,22 @@ const ScoreBoard = () => {
                             }, 0)}
                         </td>
                     </tr>
-                    <tr>
-                        <th className="fw-bold fs-6 text-gray-800">Stroke</th>
-                        {data.map((item) => {
-                            return (
-                                <td contentEditable={true} key={item.id}>{item.stroke}</td>
-                            )
-                        }   )}
-                    </tr>
+                      {
+                  
+                        playerNames?.map((item)=>{
+                          return (
+                           <tr>
+                             <th className="fw-light fs-6 text-gray-800 m-0">{item.playerName}</th>
+                             {data?.map((item) => {
+                                return (
+                                    <td contentEditable={true} key={item.id}>{item.stroke}</td>
+                                )
+                            }   )}
+                           </tr>
+                           
+                          )
+                       })
+                      }
                     </tbody>
                 </table>
             </div>

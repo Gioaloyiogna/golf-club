@@ -35,8 +35,7 @@ const ScoreBoardMain = () => {
   teeSlotData?.data.filter((item: any) => {
     const itemDate = new Date(item)
     const today = new Date(Date.now())
-    console.log('today', today)
-    console.log('week', oneWeekAgo)
+  
     if (itemDate >= oneWeekAgo && itemDate < today) {
       teeTimeArrayData.push({
         teeTime: itemDate.toLocaleString('en-US', {
@@ -49,6 +48,7 @@ const ScoreBoardMain = () => {
           hour12: false,
         }),
         dataIndex: index,
+        teeTime2: itemDate,
       })
       index++
       playersDataFunc(itemDate)
@@ -90,13 +90,17 @@ const ScoreBoardMain = () => {
     {
       title: 'Action',
       render: (record: any) => {
-        // let datee=record.
-        // console.log(record.teeTime.toDateString())
-
         return (
           <>
             <Space size='middle'>
-              <a href={`/score/${2}`} className='btn btn-light-warning btn-sm'>
+              <a
+                href={`/score/${new Date(record.teeTime2).toISOString().slice(0, 10)}${record.teeTime2.toLocaleString('en-US', {
+                  hour12: false,
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}`}
+                className='btn btn-light-warning btn-sm'
+              >
                 Update Score
               </a>
             </Space>

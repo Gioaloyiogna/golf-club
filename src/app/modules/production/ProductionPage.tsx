@@ -59,7 +59,7 @@ const ProductionPage: React.FC = () => {
         }
       />
       <Route
-        path='/score/:id*'
+        path='/score/:time*'
         element={
           <>
             <PageTitle breadcrumbs={accountBreadCrumbs}>ScoreBoard </PageTitle>

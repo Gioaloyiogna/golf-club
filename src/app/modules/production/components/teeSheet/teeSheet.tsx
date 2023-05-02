@@ -433,6 +433,8 @@ const TeeSheet = () => {
                 className='table table-rounded table-striped border gy-5 gs-5'
                 id={'myTable'}
                 onClick={(e) => {
+                  console.log('e', e);
+                  
                   clickCell(e, dateSelected)
                 }}
               >
@@ -456,7 +458,7 @@ const TeeSheet = () => {
                           return item.teeTime.substr(11, 5) === '06:00'
                         })
                         ?.map((tee: any) => (
-                          <p className='fs-9 mb-2 fw-light'>{tee.playerName}</p>
+                          <p className='fs-9 mb-2 fw-light '>{tee.playerName}</p>
                         ))}
                     </td>
                     <td>
