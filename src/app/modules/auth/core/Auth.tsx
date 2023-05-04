@@ -13,7 +13,8 @@ import {AuthModel, UserModel} from './_models'
 import * as authHelper from './AuthHelpers'
 // import {getUserByToken} from './_requests'
 import {WithChildren} from '../../../../_metronic/helpers'
-import { getUserByToken } from './_requests'
+import { parseJwt } from './_requests'
+
 
 
 type AuthContextProps = {
@@ -71,8 +72,8 @@ const AuthInit: FC<WithChildren> = ({children}) => {
     const requestUser = async (apiToken: string) => {
       try {
         if (!didRequest.current) {
-          //const data = parseJwt(apiToken)
-           const {data} = await getUserByToken(apiToken)
+          const data = parseJwt(apiToken)
+           //const {data} = await getUserByToken(apiToken)
           if (data) {
             setCurrentUser(data)
           }

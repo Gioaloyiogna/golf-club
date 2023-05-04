@@ -94,7 +94,7 @@ const ScoreBoardMain = () => {
           <>
             <Space size='middle'>
               <a
-                href={`/score/${new Date(record.teeTime2).toISOString().slice(0, 10)}${record.teeTime2.toLocaleString('en-US', {
+                href={`score/${new Date(record.teeTime2).toISOString().slice(0, 10)}${record.teeTime2.toLocaleString('en-US', {
                   hour12: false,
                   hour: '2-digit',
                   minute: '2-digit',

@@ -1,4 +1,4 @@
-import {Button, Card, Col, Form, Input, message, Modal, Row, Select, Table, Tabs} from 'antd'
+import {Button, Card, Col, Form, Input, message, Modal, Row, Select, Space, Table, Tabs} from 'antd'
 import axios from 'axios'
 import {add} from 'date-fns'
 import styles from './Calendar.module.css'
@@ -16,7 +16,16 @@ import TabPane from 'antd/es/tabs/TabPane'
 import {log} from 'console'
 
 import {query} from 'express'
-import {fetchTees, getAllCaddiesApi, getCaddyPerTeeApi, getPlayerMembers, updateCaddyApi, updateCaddySlotsApi} from '../Requests'
+import {
+  fetchTees,
+  getAllCaddiesApi,
+  getCaddyPerTeeApi,
+  getMembers,
+  getPlayerMembers,
+  getPlayers,
+  updateCaddyApi,
+  updateCaddySlotsApi,
+} from '../Requests'
 
 const teeSlot = [
   ['T06:00:00Z', 'T06:10:00Z', 'T06:20:00Z', 'T06:30:00Z', 'T06:40:00Z', 'T06:50:00Z'],
@@ -50,34 +59,58 @@ const columns = [
     key: 'playerType',
   },
   {
-    title: 'Available',
-    dataIndex: 'availabilityStatus',
-    key: 'availabilityStatus',
+    title: 'Action',
+    render: (record: any) => {
+      return (
+        <>
+          <Space size='middle'>
+            <a href='#' className='btn btn-light-danger btn-sm'>
+              Delete
+            </a>
+          </Space>
+        </>
+      )
+    },
   },
 ]
 // caddies columns
 const caddyColumns = [
   {
-    title: 'Code',
-     dataIndex:'code', 
+    title: 'Caddy Code',
+    dataIndex: 'code',
     // render: () => <a>{text}</a>,
   },
   {
-    title: 'Name',
-     dataIndex:'fname', 
+    title: 'Caddy Name',
+    dataIndex: 'fname',
     // render: () => <a>{text}</a>,
   },
   {
-    title: 'Email',
-    dataIndex:'email', 
+    title: 'Player Code',
+    dataIndex: 'code',
+    // render: () => <a>{text}</a>,
   },
   {
-    title: 'Gender',
-    dataIndex:'gender', 
+    title: 'Player Name',
+    dataIndex: 'fname',
   },
+
   {
-    title: 'Address',
-    datIndex:'address', 
+    title: 'Action',
+    render: (record: any) => {
+      return (
+        <>
+          <Space size='middle'>
+            <a href='#' className='btn btn-light-warning btn-sm'>
+              Update
+            </a>
+            <a href='#' className='btn btn-light-danger btn-sm'>
+              Delete
+            </a>
+          </Space>
+        </>
+      )
+    },
   },
 ]
 const TeeSheet = () => {
@@ -93,15 +126,13 @@ const TeeSheet = () => {
   const [open, setOpen] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [members, setMembers] = useState<any>()
-  const {data:allCaddies}=useQuery('caddiesQuery', getAllCaddiesApi)
-  
+  const {data: allCaddies} = useQuery('caddiesQuery', getAllCaddiesApi)
+
   const {data: allTees} = useQuery('tees', fetchTees)
   const {mutate: addMember} = useMutation((values: any) =>
     axios.post(`${API_URL}/TeeSlots`, values)
   )
-  const {mutate: updateCaddy} = useMutation((values: any) =>
-  updateCaddySlotsApi(values)
-  )
+  const {mutate: updateCaddy} = useMutation((values: any) => updateCaddySlotsApi(values))
   const {mutate: addNonMember} = useMutation((values: any) =>
     axios.post(`${API_URL}/NonMemberTeeSlots`, values)
   )
@@ -111,18 +142,18 @@ const TeeSheet = () => {
   const [chosenTimeNotLate, setChosenTimeNotLate] = useState('')
   const [cellSelectedDate, setcellSelectedDate] = useState('')
   const [slotData, setSlotData] = useState<any>([])
-  const caddyArray=[]
-  const {data: playerMembers, isLoading} = useQuery(['membersQuery', chosenTimeNotLate], () =>
-    getPlayerMembers(chosenTimeNotLate)
+
+  let caddyArray = []
+  // const {data: playerMembers, isLoading} = useQuery(['membersQuery', chosenTimeNotLate], () =>
+  //   getPlayerMembers(chosenTimeNotLate)
+  // )
+
+  const {data: getCaddyPerTee, isLoading} = useQuery(
+    ['getCaddyPerteeQuery', chosenTimeNotLate],
+    () => getCaddyPerTeeApi(chosenTimeNotLate)
   )
-  const {data: getCaddyPerTee} = useQuery(['getCaddyPerteeQuery', chosenTimeNotLate], () =>
-  getCaddyPerTeeApi(chosenTimeNotLate)
-  )
+  const {data: getPlayersData} = useQuery('getPlayersQuery', () => getPlayers())
   caddyArray.push(getCaddyPerTee?.data)
-
-
-
-  
 
   var counter = 6
   const [SlotsNumber, setSlotsNumber] = useState<any>([])
@@ -136,7 +167,7 @@ const TeeSheet = () => {
     availabilityStatus: 'yes',
     caddyId: 0,
   })
-  const [caddyData, setCaddyData]=useState({
+  const [caddyData, setCaddyData] = useState({
     memberId: 0,
     playerType: '',
     playerEmail: '',
@@ -179,6 +210,7 @@ const TeeSheet = () => {
           message.success('Member added successfully')
           queryClient.invalidateQueries('membersQuery')
           queryClient.invalidateQueries('tees')
+
           form.resetFields()
         },
         onError: (error: any) => {
@@ -194,37 +226,48 @@ const TeeSheet = () => {
       'en-US',
       {hour12: false, hour: '2-digit', minute: '2-digit'}
     )}`
-    setFormData({...formData, memberId: value, teeTime: teeTime})
+
+    const data = getPlayersData?.data.find((item: any) => {
+      return item.memberId == value
+    })
+
+    let newData: any = []
+    //  newDat.find((item)=>{
+    //   return item
+    //  })
+    newData.push(data)
+    // addedMembers.push(data[0][0])
+    setSlotData((mem: any) => [...mem, newData[0]])
+
+    //setFormData({...formData, memberId: value, teeTime: teeTime})
   }
+
   const handleOnChangeCaddy = (value: any) => {
     var teeTime = `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString(
       'en-US',
       {hour12: false, hour: '2-digit', minute: '2-digit'}
     )}`
     setCaddyData({...caddyData, caddyId: value, teeTime: teeTime})
-     
-    
-    
   }
- 
- useEffect(() => {
-  if (caddyData.teeTime !=='' ) {
-    updateCaddy(caddyData, {
-      onSuccess: () => {
-        // setIsEditing(false)
 
-        message.success('Caddy added successfully')
-        queryClient.invalidateQueries('getCaddyPerteeQuery')
-        queryClient.invalidateQueries('tees')
-        form.resetFields()
-      },
-      onError: (error: any) => {
-        message.error('Failed to add Caddy')
-        console.log(error.message)
-      },
-    })
-  }
-}, [caddyData])
+  useEffect(() => {
+    if (caddyData.teeTime !== '') {
+      updateCaddy(caddyData, {
+        onSuccess: () => {
+          // setIsEditing(false)
+
+          message.success('Caddy added successfully')
+          queryClient.invalidateQueries('getCaddyPerteeQuery')
+          queryClient.invalidateQueries('tees')
+          form.resetFields()
+        },
+        onError: (error: any) => {
+          message.error('Failed to add Caddy')
+          console.log(error.message)
+        },
+      })
+    }
+  }, [caddyData])
 
   const onFinish = (values: any) => {
     // var MemberFormData = new FormData()
@@ -232,7 +275,7 @@ const TeeSheet = () => {
       'en-US',
       {hour12: false, hour: '2-digit', minute: '2-digit'}
     )}`
-   
+
     values.teeTime = teeTime
     values.playerType = 'Non-member'
     values.availabilityStatus = 'yes'
@@ -256,6 +299,9 @@ const TeeSheet = () => {
         console.log(error.message)
       },
     })
+  }
+  const onFinishForMember = (values: any) => {
+    console.log('values', values)
   }
   const [hostMembership, setHostMembership] = useState<string>()
   const [player2Membership, setplayer2Membership] = useState<string>()
@@ -301,7 +347,10 @@ const TeeSheet = () => {
         minute: '2-digit',
       })}`
     )
+
+    //  playersData
   }
+
   // picking the chosen date for fetching products
 
   // const updateDate=()=>{
@@ -310,9 +359,33 @@ const TeeSheet = () => {
   //     {hour12: false, hour: '2-digit', minute: '2-digit'}
   //   )}` )
   // }
- 
 
   // cell per date
+  function clickCell2(e: any, date: any) {
+    // setModalContent({
+    //   date: date,
+    //   rowIndex: e.target.parentNode.rowIndex,
+    //   columnIndex: e.target.cellIndex,
+    // })
+    setOpen(true)
+
+    //get row that was click
+    // console.log('row', e.target.parentNode.rowIndex)
+    // //get column that was click
+    // console.log('column', e.target.cellIndex)
+    // setChosenTime(
+    //   `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
+    //     hour12: false,
+    //     hour: '2-digit',
+    //     minute: '2-digit',
+    //   })}`
+    // )
+
+    //  })
+    //  console.log(getPlayers?.data);
+
+    //  playersData
+  }
 
   const getTeeByDate = allTees?.data.filter((item: any) => {
     return item.teeTime.includes(cellSelectedDate)
@@ -339,10 +412,6 @@ const TeeSheet = () => {
     })
 
   useEffect(() => {
-    if (chosenTimeNotLate) {
-      queryClient.invalidateQueries('membersQuery')
-    }
-
     setChosenTimeNotLate(
       `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
         hour12: false,
@@ -351,6 +420,16 @@ const TeeSheet = () => {
       })}`
     )
   }, [chosenTime])
+
+  useEffect(() => {
+    setSlotData([])
+    const data = getPlayersData?.data.filter((item: any) => {
+      return item.teeTime == chosenTimeNotLate
+    })
+    data?.map((item: any) => {
+      setSlotData((mem: any) => [...mem, item])
+    })
+  }, [chosenTimeNotLate])
 
   // get next week dates in an array
   function getNextTwoWeeksDates() {
@@ -400,6 +479,7 @@ const TeeSheet = () => {
     const params: any = useParams()
     const isoDateFromUrl = params.date
     const dateSelected = new Date(isoDateFromUrl).toISOString()
+
     //  chosenTime= `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString(
     //   'en-US',
     //   {hour12: false, hour: '2-digit', minute: '2-digit'}
@@ -433,8 +513,8 @@ const TeeSheet = () => {
                 className='table table-rounded table-striped border gy-5 gs-5'
                 id={'myTable'}
                 onClick={(e) => {
-                  console.log('e', e);
-                  
+                  console.log('e', e)
+
                   clickCell(e, dateSelected)
                 }}
               >
@@ -458,7 +538,13 @@ const TeeSheet = () => {
                           return item.teeTime.substr(11, 5) === '06:00'
                         })
                         ?.map((tee: any) => (
-                          <p className='fs-9 mb-2 fw-light '>{tee.playerName}</p>
+                          <p
+                            onClick={(e: any) => clickCell2(e, dateSelected)}
+                            style={{cursor: 'pointer'}}
+                            className='fs-9 mb-2 fw-light '
+                          >
+                            {tee.playerName}
+                          </p>
                         ))}
                     </td>
                     <td>
@@ -1179,48 +1265,61 @@ const TeeSheet = () => {
               >
                 <Tabs>
                   <Tabs.TabPane tab='Member' key='Member'>
-                    <Form form={form}>
-                      <Form.Item
-                        name='playerId'
-                        label='Player'
-                        rules={[{required: true, message: 'Missing Host'}]}
+                    <Form form={form} onFinish={onFinishForMember}>
+                      {/* <label htmlFor="member-select">Player: </label> */}
+                      <Select
+                        id='member-select'
+                        placeholder='Select Member'
+                        // onChange={(value) => memberOnChange(value)}
+                        onChange={handleOnChange}
+                        className='w-100 m-1'
                       >
-                        <Select
-                          placeholder='Select Member'
-                          // onChange={(value) => memberOnChange(value)}
-                          onChange={handleOnChange}
+                        <option value='' disabled>
+                          Select Player
+                        </option>
+                        {members?.map((member: any) => (
+                          <Option key={member.id} value={member.id}>
+                            {member.fname}
+                            {member.lname}-{member.code}
+                          </Option>
+                        ))}
+                      </Select>
+
+                      <Form.Item>
+                        <Button
+                          type='primary'
+                          htmlType='submit'
+                          className='menu-title'
+                          style={{backgroundColor: '#47be7d'}}
                         >
-                          {members?.map((member: any) => (
-                            <Option key={member.id} value={member.id}>
-                              {member.fname}
-                              {member.lname}-{member.code}
-                            </Option>
-                          ))}
-                        </Select>
+                          Submit
+                        </Button>
                       </Form.Item>
                     </Form>
-                    <div className='bg-success d-flex text-white p-1 justify-content-center'>
-                      {4 - playerMembers?.data.length === 0 ? (
+                    <div
+                      className='d-flex text-white p-1 justify-content-center'
+                      style={{backgroundColor: '#47be7d'}}
+                    >
+                      {4 - slotData?.length === 0 ? (
                         <>
                           <p className='p-1 text-white h1'>List of players is full</p>
                         </>
                       ) : (
                         <>
                           <p className='p-1'>Players left: </p>
-                          <span className='font-bold p-1 h2 text-white '>
-                            {' '}
-                            {4 - playerMembers?.data.length}
+                          <span className='font-bold h2 text-white '>
+                       
+                            <span className="badge bg-primary p-3 font-bold fs-5">{4 - slotData.length}</span>
                           </span>
                         </>
                       )}
                     </div>
                     <Table
                       columns={columns}
-                      dataSource={playerMembers?.data}
+                      dataSource={slotData}
                       loading={isLoading}
                       className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
                     />
-                    ;
                   </Tabs.TabPane>
                   <Tabs.TabPane tab='Non-Member' key='NonMember'>
                     <Form onFinish={onFinish}>
@@ -1238,14 +1337,22 @@ const TeeSheet = () => {
                         />
                       </Form.Item>
                       <Form.Item>
-                        <Button type='primary' htmlType='submit' className='menu-title'>
+                        <Button
+                          type='primary'
+                          htmlType='submit'
+                          className='menu-title'
+                          style={{backgroundColor: '#47be7d'}}
+                        >
                           Submit
                         </Button>
                       </Form.Item>
                     </Form>
 
-                    <div className='bg-success d-flex text-white p-1 justify-content-center'>
-                      {4 - playerMembers?.data.length === 0 ? (
+                    <div
+                      className='bg-success d-flex text-white p-1 justify-content-center'
+                      style={{backgroundColor: '#47be7d'}}
+                    >
+                      {4 - slotData.length === 0 ? (
                         <>
                           <p className='p-1 text-white h1'>List of players is full</p>
                         </>
@@ -1253,8 +1360,9 @@ const TeeSheet = () => {
                         <>
                           <p className='p-1'>Players left: </p>
                           <span className='font-bold p-1 h2 text-white '>
-                            {' '}
-                            {4 - playerMembers?.data.length}
+                        
+                            <span className="badge bg-primary p-3 font-bold fs-5">{4 - slotData.length}</span>
+                            
                           </span>
                         </>
                       )}
@@ -1262,37 +1370,64 @@ const TeeSheet = () => {
                     <Table
                       columns={columns}
                       className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
-                      dataSource={playerMembers?.data}
+                      dataSource={slotData}
                     />
                   </Tabs.TabPane>
                   <Tabs.TabPane tab='Caddy' key='Caddy'>
                     <Form form={form}>
-                      <Form.Item
-                        name='caddyId'
-                        label='Caddy'
-                        rules={[{required: true, message: 'Missing Caddy'}]}
+                      <Select
+                        placeholder='Select Caddy'
+                        // onChange={(value) => memberOnChange(value)}
+                        onChange={handleOnChangeCaddy}
+                        className='w-100 m-1'
                       >
-                        <Select
-                          placeholder='Select Caddy'
-                          // onChange={(value) => memberOnChange(value)}
-                          onChange={handleOnChangeCaddy}
+                        <option value='' disabled>
+                          Select Caddy
+                        </option>
+                        {allCaddies?.data.map((caddy: any) => (
+                          <Option key={caddy.id} value={caddy.id}>
+                            {caddy.fname}
+                            {caddy.lname}-{caddy.code}
+                          </Option>
+                        ))}
+                      </Select>
+
+                      <Select
+                        id='member-select'
+                        placeholder='Select Member'
+                        // onChange={(value) => memberOnChange(value)}
+                        onChange={handleOnChange}
+                        className='w-100 m-1 mb-2'
+                      >
+                        <option value='' disabled>
+                          Select Player
+                        </option>
+                        {members?.map((member: any) => (
+                          <Option key={member.id} value={member.id}>
+                            {member.fname}
+                            {member.lname}-{member.code}
+                          </Option>
+                        ))}
+                      </Select>
+
+                      <Form.Item>
+                        <Button
+                          type='primary'
+                          htmlType='submit'
+                          className='menu-title'
+                          style={{backgroundColor: '#47be7d'}}
                         >
-                          {allCaddies?.data.map((caddy: any) => (
-                            <Option key={caddy.id} value={caddy.id}>
-                              {caddy.fname}
-                              {caddy.lname}-{caddy.code}
-                            </Option>
-                          ))}
-                        </Select>
+                          Submit
+                        </Button>
                       </Form.Item>
                     </Form>
-                    
+
                     <Table
                       columns={caddyColumns}
                       dataSource={caddyArray}
+                      loading={isLoading}
                       className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
                     />
-                    
                   </Tabs.TabPane>
                 </Tabs>
 
