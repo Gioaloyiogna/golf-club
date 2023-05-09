@@ -2,7 +2,7 @@ import {Button, Card, Col, Form, Input, message, Modal, Row, Select, Space, Tabl
 import axios from 'axios'
 import {add} from 'date-fns'
 import styles from './Calendar.module.css'
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {KTCard, KTCardBody} from '../../../../../_metronic/helpers'
 import {API_URL, BASE_URL} from '../../../../urls'
 import {Outlet, Route, Routes, useNavigate, useParams} from 'react-router-dom'
@@ -19,6 +19,7 @@ import {query} from 'express'
 import {
   fetchTees,
   getAllCaddiesApi,
+  getAllCaddiesTees,
   getCaddyPerTeeApi,
   getMembers,
   getPlayerMembers,
@@ -27,93 +28,99 @@ import {
   updateCaddySlotsApi,
 } from '../Requests'
 
-const teeSlot = [
-  ['T06:00:00Z', 'T06:10:00Z', 'T06:20:00Z', 'T06:30:00Z', 'T06:40:00Z', 'T06:50:00Z'],
-  ['T07:00:00Z', 'T07:10:00Z', 'T07:20:00Z', 'T07:30:00Z', 'T07:40:00Z', 'T07:50:00Z'],
-  ['T08:00:00Z', 'T08:10:00Z', 'T08:20:00Z', 'T08:30:00Z', 'T08:40:00Z', 'T08:50:00Z'],
-  ['T09:00:00Z', 'T09:10:00Z', 'T09:20:00Z', 'T09:30:00Z', 'T09:40:00Z', 'T09:50:00Z'],
-  ['T10:00:00Z', 'T10:10:00Z', 'T10:20:00Z', 'T10:30:00Z', 'T10:40:00Z', 'T10:50:00Z'],
-  ['T11:00:00Z', 'T11:10:00Z', 'T11:20:00Z', 'T11:30:00Z', 'T11:40:00Z', 'T11:50:00Z'],
-  ['T12:00:00Z', 'T12:10:00Z', 'T12:20:00Z', 'T12:30:00Z', 'T12:40:00Z', 'T12:50:00Z'],
-  ['T13:00:00Z', 'T13:10:00Z', 'T13:20:00Z', 'T13:30:00Z', 'T13:40:00Z', 'T13:50:00Z'],
-  ['T14:00:00Z', 'T14:10:00Z', 'T14:20:00Z', 'T14:30:00Z', 'T14:40:00Z', 'T14:50:00Z'],
-  ['T15:00:00Z', 'T15:10:00Z', 'T15:20:00Z', 'T15:30:00Z', 'T15:40:00Z', 'T15:50:00Z'],
-  ['T16:00:00Z', 'T16:10:00Z', 'T16:20:00Z', 'T16:30:00Z', 'T16:40:00Z', 'T16:50:00Z'],
-]
-
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'playerName',
-    key: 'playerName',
-    // render: () => <a>{text}</a>,
-  },
-  {
-    title: 'Email',
-    dataIndex: 'playerEmail',
-    key: 'playerEmail',
-  },
-  {
-    title: 'playerType',
-    dataIndex: 'playerType',
-    key: 'playerType',
-  },
-  {
-    title: 'Action',
-    render: (record: any) => {
-      return (
-        <>
-          <Space size='middle'>
-            <a href='#' className='btn btn-light-danger btn-sm'>
-              Delete
-            </a>
-          </Space>
-        </>
-      )
-    },
-  },
-]
-// caddies columns
-const caddyColumns = [
-  {
-    title: 'Caddy Code',
-    dataIndex: 'code',
-    // render: () => <a>{text}</a>,
-  },
-  {
-    title: 'Caddy Name',
-    dataIndex: 'fname',
-    // render: () => <a>{text}</a>,
-  },
-  {
-    title: 'Player Code',
-    dataIndex: 'code',
-    // render: () => <a>{text}</a>,
-  },
-  {
-    title: 'Player Name',
-    dataIndex: 'fname',
-  },
-
-  {
-    title: 'Action',
-    render: (record: any) => {
-      return (
-        <>
-          <Space size='middle'>
-            <a href='#' className='btn btn-light-warning btn-sm'>
-              Update
-            </a>
-            <a href='#' className='btn btn-light-danger btn-sm'>
-              Delete
-            </a>
-          </Space>
-        </>
-      )
-    },
-  },
-]
 const TeeSheet = () => {
+  const teeSlot = [
+    ['T06:00:00Z', 'T06:10:00Z', 'T06:20:00Z', 'T06:30:00Z', 'T06:40:00Z', 'T06:50:00Z'],
+    ['T07:00:00Z', 'T07:10:00Z', 'T07:20:00Z', 'T07:30:00Z', 'T07:40:00Z', 'T07:50:00Z'],
+    ['T08:00:00Z', 'T08:10:00Z', 'T08:20:00Z', 'T08:30:00Z', 'T08:40:00Z', 'T08:50:00Z'],
+    ['T09:00:00Z', 'T09:10:00Z', 'T09:20:00Z', 'T09:30:00Z', 'T09:40:00Z', 'T09:50:00Z'],
+    ['T10:00:00Z', 'T10:10:00Z', 'T10:20:00Z', 'T10:30:00Z', 'T10:40:00Z', 'T10:50:00Z'],
+    ['T11:00:00Z', 'T11:10:00Z', 'T11:20:00Z', 'T11:30:00Z', 'T11:40:00Z', 'T11:50:00Z'],
+    ['T12:00:00Z', 'T12:10:00Z', 'T12:20:00Z', 'T12:30:00Z', 'T12:40:00Z', 'T12:50:00Z'],
+    ['T13:00:00Z', 'T13:10:00Z', 'T13:20:00Z', 'T13:30:00Z', 'T13:40:00Z', 'T13:50:00Z'],
+    ['T14:00:00Z', 'T14:10:00Z', 'T14:20:00Z', 'T14:30:00Z', 'T14:40:00Z', 'T14:50:00Z'],
+    ['T15:00:00Z', 'T15:10:00Z', 'T15:20:00Z', 'T15:30:00Z', 'T15:40:00Z', 'T15:50:00Z'],
+    ['T16:00:00Z', 'T16:10:00Z', 'T16:20:00Z', 'T16:30:00Z', 'T16:40:00Z', 'T16:50:00Z'],
+  ]
+  const isSmallScreen = window.innerWidth < 768
+  const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'playerName',
+      key: 'playerName',
+      // render: () => <a>{text}</a>,
+    },
+    {
+      title: 'Email',
+      dataIndex: 'playerEmail',
+      key: 'playerEmail',
+    },
+    {
+      title: 'playerType',
+      dataIndex: 'playerType',
+      key: 'playerType',
+    },
+    {
+      title: 'Action',
+      render: (record: any) => {
+        return (
+          <>
+            <Space size='middle'>
+              <a
+                href='#'
+                className='btn btn-light-danger btn-sm'
+                onClick={() =>
+                  deletePlayer(
+                    record.id,
+                    record.teeTime,
+                    record.memberId,
+                    record.playerType,
+                    record.playerEmail
+                  )
+                }
+              >
+                Delete
+              </a>
+            </Space>
+          </>
+        )
+      },
+    },
+  ]
+
+  // caddies columns
+  const caddyColumns = [
+    {
+      title: 'Code',
+      dataIndex: 'code',
+      // render: () => <a>{text}</a>,
+    },
+    {
+      title: 'Name',
+      dataIndex: 'caddyName',
+      // render: () => <a>{text}</a>,
+    },
+    {
+      title: 'Email',
+      dataIndex: 'caddyEmail',
+      // render: () => <a>{text}</a>,
+    },
+
+    {
+      title: 'Action',
+      render: (record: any) => {
+        return (
+          <>
+            <Space size='middle'>
+              <a href='#' className='btn btn-light-danger btn-sm'>
+                Delete
+              </a>
+            </Space>
+          </>
+        )
+      },
+    },
+  ]
   useEffect(() => {
     axios.get(`${API_URL}/members`).then((res) => {
       setMembers(res.data)
@@ -127,62 +134,156 @@ const TeeSheet = () => {
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [members, setMembers] = useState<any>()
   const {data: allCaddies} = useQuery('caddiesQuery', getAllCaddiesApi)
-
-  const {data: allTees} = useQuery('tees', fetchTees)
-  const {mutate: addMember} = useMutation((values: any) =>
-    axios.post(`${API_URL}/TeeSlots`, values)
+  const {data: caddyTeesDataApi} = useQuery('allCaddiesQuery', getAllCaddiesTees)
+  const {mutate: deletePlayers} = useMutation((values: any) =>
+    axios.delete(`${API_URL}/TeeSlots/${values.id}/${values.teeTime}`)
   )
+  const {mutate: deleteNonPlayers} = useMutation((values: any) =>
+    axios.delete(`${API_URL}/NonMemberTeeSlots/${values.email}/${values.teeTime}`)
+  )
+  const {data: allTees} = useQuery('tees', fetchTees)
+  // const {mutate: addMember} = useMutation((values: any) =>
+  //   axios.post(`${API_URL}/TeeSlots`, values)
+  // )
   const {mutate: updateCaddy} = useMutation((values: any) => updateCaddySlotsApi(values))
   const {mutate: addNonMember} = useMutation((values: any) =>
     axios.post(`${API_URL}/NonMemberTeeSlots`, values)
   )
+  const {mutate: addCaddy} = useMutation((values: any) =>
+    axios.post(`${API_URL}/CaddyTees`, values)
+  )
+
+  const {data: allExistingTees} = useQuery('allExistingTees', () => getPlayers())
+
   const [form] = Form.useForm()
+  const [nonMemberForm] = Form.useForm()
+  const [caddForm] = Form.useForm()
   const queryClient = useQueryClient()
   const [chosenTime, setChosenTime] = useState('')
   const [chosenTimeNotLate, setChosenTimeNotLate] = useState('')
   const [cellSelectedDate, setcellSelectedDate] = useState('')
   const [slotData, setSlotData] = useState<any>([])
+  const [allCaddyData, setallCaddyData] = useState<any>([])
+  var counter = 6
+  let caddyArray: any = []
 
-  let caddyArray = []
   // const {data: playerMembers, isLoading} = useQuery(['membersQuery', chosenTimeNotLate], () =>
   //   getPlayerMembers(chosenTimeNotLate)
   // )
 
-  const {data: getCaddyPerTee, isLoading} = useQuery(
-    ['getCaddyPerteeQuery', chosenTimeNotLate],
-    () => getCaddyPerTeeApi(chosenTimeNotLate)
-  )
+  // const {data: getCaddyPerTee, isLoading} = useQuery(
+  //   ['getCaddyPerteeQuery', chosenTimeNotLate],
+  //   () => getCaddyPerTeeApi(chosenTimeNotLate)
+  // )
   const {data: getPlayersData} = useQuery('getPlayersQuery', () => getPlayers())
-  caddyArray.push(getCaddyPerTee?.data)
+  //caddyArray.push(getCaddyPerTee?.data)
+  const {data: getMembersData} = useQuery('getMembersData', () => getMembers())
 
-  var counter = 6
-  const [SlotsNumber, setSlotsNumber] = useState<any>([])
-
-  const [formData, setFormData] = useState({
-    memberId: '',
-    playerType: 'Member',
-    playerEmail: 'gio.aloyiogna@gmail.com',
-    teeTime: '',
-    playerName: 'Giovanni',
-    availabilityStatus: 'yes',
-    caddyId: 0,
-  })
-  const [caddyData, setCaddyData] = useState({
-    memberId: 0,
-    playerType: '',
-    playerEmail: '',
-    teeTime: '',
-    playerName: '',
-    availabilityStatus: '',
-    caddyId: 0,
-  })
+  // const [formData, setFormData] = useState({
+  //   memberId: '',
+  //   playerType: 'Member',
+  //   playerEmail: 'gio.aloyiogna@gmail.com',
+  //   teeTime: '',
+  //   playerName: 'Giovanni',
+  //   availabilityStatus: 'yes',
+  //   caddyId: 0,
+  // })
+  const [caddyData, setCaddyData] = useState<any>([])
   const [selectedDate, setSelectedDate] = useState<string>()
   const [modalContent, setModalContent] = useState({
     date: '',
     rowIndex: 1,
     columnIndex: 1,
   })
+  const deletePlayer = (
+    id: any,
+    teeTime: string,
+    memberId: any,
+    playerType: any,
+    playerEmail: any
+  ) => {
+    Modal.confirm({
+      okText: 'Yes',
+      okType: 'danger',
+      title: 'Are you sure, you want to delete this player?',
+      onOk: () => {
+        if (playerType === 'Member') {
+          const data = allExistingTees?.data.find((tee: any) => {
+            return tee.teeTime == teeTime && tee.id == id
+          })
 
+          if (data) {
+            deletePlayers(
+              {id, teeTime},
+              {
+                onSuccess: () => {
+                  // setIsEditing(false)
+                  const slotdata = slotData.find((t: any) => {
+                    return t.teeTime == teeTime && t.id == id
+                  })
+                  const newArr = slotData.filter((item: any) => {
+                    return item.memberId != slotdata.memberId
+                  })
+                  setSlotData(newArr)
+                  message.success('Member deleted successfully')
+                  queryClient.invalidateQueries('membersQuery')
+                  queryClient.invalidateQueries('tees')
+
+                  form.resetFields()
+                },
+                onError: (error: any) => {
+                  message.error('Failed to delete Member')
+                  console.log(error.message)
+                },
+              }
+            )
+          } else {
+            const newArr = slotData.filter((item: any) => {
+              return item.memberId != memberId
+            })
+            setSlotData(newArr)
+          }
+        }
+
+        if (playerType === 'Non-member') {
+          const data = allExistingTees?.data.find((tee: any) => {
+            return tee.teeTime == teeTime && tee.playerEmail == playerEmail
+          })
+          if (data) {
+            deleteNonPlayers(
+              {playerEmail, teeTime},
+              {
+                onSuccess: () => {
+                  // setIsEditing(false)
+                  const slotdata = slotData.find((t: any) => {
+                    return t.teeTime == teeTime && t.playerEmail == playerEmail
+                  })
+                  const newArr = slotData.filter((item: any) => {
+                    return item.playerEmail == playerEmail
+                  })
+                  setSlotData(newArr)
+                  message.success('Member deleted successfully')
+                  queryClient.invalidateQueries('membersQuery')
+                  queryClient.invalidateQueries('tees')
+
+                  form.resetFields()
+                },
+                onError: (error: any) => {
+                  message.error('Failed to delete Member')
+                  console.log(error.message)
+                },
+              }
+            )
+          } else {
+            const newArr = slotData.filter((item: any) => {
+              return item.playerEmail != playerEmail
+            })
+            setSlotData(newArr)
+          }
+        }
+      },
+    })
+  }
   const getDatestring = () =>
     new Date(
       `${modalContent.date.split('T')[0]}${
@@ -197,49 +298,49 @@ const TeeSheet = () => {
   }
 
   const handleCancel = () => {
-    console.log('Clicked cancel button')
+    form.resetFields()
+    
+    nonMemberForm.resetFields()
+    caddForm.resetFields()
+    setSlotData([])
+    setallCaddyData([])
     setOpen(false)
   }
-  // submiting members
-  useEffect(() => {
-    if (formData.memberId != '') {
-      addMember(formData, {
-        onSuccess: () => {
-          // setIsEditing(false)
-
-          message.success('Member added successfully')
-          queryClient.invalidateQueries('membersQuery')
-          queryClient.invalidateQueries('tees')
-
-          form.resetFields()
-        },
-        onError: (error: any) => {
-          message.error('Failed to add Member')
-          console.log(error.message)
-        },
-      })
-    }
-  }, [formData])
 
   const handleOnChange = (value: any) => {
+    // form.setFieldsValue({
+    //   selectDropDown: value
+    // })
     var teeTime = `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString(
       'en-US',
       {hour12: false, hour: '2-digit', minute: '2-digit'}
     )}`
 
-    const data = getPlayersData?.data.find((item: any) => {
-      return item.memberId == value
+    const data = getMembersData?.data.find((item: any) => {
+      return item.id == value
     })
 
-    let newData: any = []
-    //  newDat.find((item)=>{
-    //   return item
-    //  })
-    newData.push(data)
-    // addedMembers.push(data[0][0])
-    setSlotData((mem: any) => [...mem, newData[0]])
+    const newMemberObject = {
+      memberId: value,
+      playerType: 'Member',
+      playerEmail: data.email,
+      teeTime: teeTime,
+      playerName: data.fname + data.lname,
+      availabilityStatus: 'yes',
+      caddyId: 0,
+    }
 
-    //setFormData({...formData, memberId: value, teeTime: teeTime})
+    const isMemberExists = slotData.some((item: any) => item.memberId === newMemberObject.memberId)
+    if (isMemberExists) {
+      message.info('Member Already added!')
+      return
+    }
+    if (slotData.length > 3) {
+      message.info('Members cannot exceed 4!')
+      return
+    }
+
+    setSlotData([...slotData, newMemberObject])
   }
 
   const handleOnChangeCaddy = (value: any) => {
@@ -247,27 +348,35 @@ const TeeSheet = () => {
       'en-US',
       {hour12: false, hour: '2-digit', minute: '2-digit'}
     )}`
-    setCaddyData({...caddyData, caddyId: value, teeTime: teeTime})
-  }
 
-  useEffect(() => {
-    if (caddyData.teeTime !== '') {
-      updateCaddy(caddyData, {
-        onSuccess: () => {
-          // setIsEditing(false)
+    const data = allCaddyData?.find((item: any) => {
+      return item.caddyId == value && item.teeTime == teeTime
+    })
 
-          message.success('Caddy added successfully')
-          queryClient.invalidateQueries('getCaddyPerteeQuery')
-          queryClient.invalidateQueries('tees')
-          form.resetFields()
-        },
-        onError: (error: any) => {
-          message.error('Failed to add Caddy')
-          console.log(error.message)
-        },
-      })
+    if (data) {
+      message.info('Caddy already exists for this tee!')
+      return
     }
-  }, [caddyData])
+    if (allCaddyData.length > 3) {
+      message.info('More than 4 caddies cannot be assigned to one tee!')
+      return
+    }
+    const caddyDat = allCaddies?.data.filter((item: any) => {
+      return item.id == value
+    })
+
+    const caddyObj = {
+      caddyId: value,
+      code: caddyDat[0].code ? caddyDat[0].code : 'C-001',
+      teeTime: teeTime,
+      caddyName: caddyDat[0].lname + '' + caddyDat[0].fname,
+      caddyEmail: caddyDat[0].email,
+      caddyPhone: caddyDat[0].phone,
+      caddyGender: caddyDat[0].gender,
+    }
+
+    setallCaddyData([...allCaddyData, caddyObj])
+  }
 
   const onFinish = (values: any) => {
     // var MemberFormData = new FormData()
@@ -280,28 +389,94 @@ const TeeSheet = () => {
     values.playerType = 'Non-member'
     values.availabilityStatus = 'yes'
     values.caddyId = '0'
-    console.log(values)
+    console.log('values', values)
 
-    // console.log(Object.fromEntries(MemberFormData));
+    const nonMemberExists = slotData.some((item: any) => item.playerEmail === values.playerEmail)
+    if (nonMemberExists) {
+      message.info('Non Member Already exists!')
+      return
+    }
+    if (slotData.length > 3) {
+      message.info('Members cannot exceed 4!')
+      return
+    }
 
-    addNonMember(values, {
-      onSuccess: () => {
-        // setIsEditing(false)
+    setSlotData([...slotData, values])
 
-        message.success('Member added successfully')
-        queryClient.invalidateQueries('membersQuery')
-        queryClient.invalidateQueries('tees')
-        form.resetFields()
-        //queryClient.invalidateQueries('membersQuery')
-      },
-      onError: (error: any) => {
-        message.error('Failed to add Member')
-        console.log(error.message)
-      },
+    nonMemberForm.resetFields()
+  }
+  const handleNonMemberSubmit = () => {
+    slotData?.map((item: any) => {
+      addNonMember(item, {
+        onSuccess: () => {
+          // setIsEditing(false)
+
+          message.success('Member added successfully')
+          queryClient.invalidateQueries('membersQuery')
+          queryClient.invalidateQueries('getPlayersQuery')
+          queryClient.invalidateQueries('allCaddiesQuery')
+          queryClient.invalidateQueries('tees')
+          //form.resetFields()
+          //queryClient.invalidateQueries('membersQuery')
+        },
+        onError: (error: any) => {
+          message.error('Failed to add Member')
+          console.log(error.message)
+        },
+      })
+      nonMemberForm.resetFields()
     })
   }
+  const handleCaddyOnSubmit = () => {
+    allCaddyData?.map((item: any) => {
+      addCaddy(item, {
+        onSuccess: () => {
+          // setIsEditing(false)
+
+          message.success('Caddy added successfully')
+          queryClient.invalidateQueries('membersQuery')
+          queryClient.invalidateQueries('getPlayersQuery')
+          queryClient.invalidateQueries('allCaddiesQuery')
+          queryClient.invalidateQueries('tees')
+          //form.resetFields()
+          //queryClient.invalidateQueries('membersQuery')
+        },
+        onError: (error: any) => {
+          message.error('Failed to add Member')
+          console.log(error.message)
+        },
+      })
+      caddForm.resetFields()
+    })
+  }
+
   const onFinishForMember = (values: any) => {
-    console.log('values', values)
+    Modal.confirm({
+      okText: 'Yes',
+      okType: 'danger',
+      title: 'Are you sure, you want to add this member?',
+      onOk: () => {
+        slotData?.map(async (item: any) => {
+          try {
+            const data = allExistingTees?.data.find((tee: any) => {
+              return tee.teeTime == item.teeTime && tee.memberId == item.memberId
+            })
+            if (!data) {
+              const response = await axios.post(`${API_URL}/TeeSlots`, item)
+            }
+          } catch (error) {
+            message.success('Adding member(s) failed!')
+          } finally {
+            form.resetFields()
+            message.success('Member(s) added successfully!')
+            queryClient.invalidateQueries('membersQuery')
+            queryClient.invalidateQueries('getPlayersQuery')
+            queryClient.invalidateQueries('allCaddiesQuery')
+            queryClient.invalidateQueries('tees')
+          }
+        })
+      },
+    })
   }
   const [hostMembership, setHostMembership] = useState<string>()
   const [player2Membership, setplayer2Membership] = useState<string>()
@@ -334,8 +509,13 @@ const TeeSheet = () => {
       rowIndex: e.target.parentNode.rowIndex,
       columnIndex: e.target.cellIndex,
     })
+    setSlotData([])
+    setallCaddyData([])
+    caddForm.resetFields()
+    form.resetFields()
+    nonMemberForm.resetFields()
     setOpen(true)
-
+  
     //get row that was click
     console.log('row', e.target.parentNode.rowIndex)
     //get column that was click
@@ -412,6 +592,8 @@ const TeeSheet = () => {
     })
 
   useEffect(() => {
+    setSlotData([])
+    setallCaddyData([])
     setChosenTimeNotLate(
       `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
         hour12: false,
@@ -423,15 +605,24 @@ const TeeSheet = () => {
 
   useEffect(() => {
     setSlotData([])
+    setallCaddyData([])
+    
     const data = getPlayersData?.data.filter((item: any) => {
       return item.teeTime == chosenTimeNotLate
     })
+    const caddyFilteredData = caddyTeesDataApi?.data.filter((item: any) => {
+      return item.teeTime == chosenTimeNotLate
+    })
+
     data?.map((item: any) => {
       setSlotData((mem: any) => [...mem, item])
     })
+
+    caddyFilteredData?.map((item: any) => {
+      setallCaddyData((mem: any) => [...mem, item])
+    })
   }, [chosenTimeNotLate])
 
-  // get next week dates in an array
   function getNextTwoWeeksDates() {
     //create an array to store next 7 days
     const today = new Date()
@@ -489,7 +680,7 @@ const TeeSheet = () => {
     //2021-08-02T00:00:00.000Z
     setSelectedDate(dateSelected)
     // console.log(selectedDate);
-    form.resetFields()
+    //form.resetFields()
     // queryClient.invalidateQueries('membersQuery')
 
     return (
@@ -1262,38 +1453,45 @@ const TeeSheet = () => {
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
                 footer={null}
+                width={isSmallScreen ? '90%' : 650}
               >
                 <Tabs>
                   <Tabs.TabPane tab='Member' key='Member'>
-                    <Form form={form} onFinish={onFinishForMember}>
-                      {/* <label htmlFor="member-select">Player: </label> */}
-                      <Select
-                        id='member-select'
-                        placeholder='Select Member'
-                        // onChange={(value) => memberOnChange(value)}
-                        onChange={handleOnChange}
-                        className='w-100 m-1'
-                      >
-                        <option value='' disabled>
-                          Select Player
-                        </option>
-                        {members?.map((member: any) => (
-                          <Option key={member.id} value={member.id}>
-                            {member.fname}
-                            {member.lname}-{member.code}
-                          </Option>
-                        ))}
-                      </Select>
-
-                      <Form.Item>
+                    <Form onFinish={onFinishForMember} form={form}>
+                      <Space>
                         <Button
                           type='primary'
                           htmlType='submit'
-                          className='menu-title'
-                          style={{backgroundColor: '#47be7d'}}
+                          className='menu-title btn-success mb-2'
                         >
-                          Submit
+                          Ok
                         </Button>
+
+                        <Button className='btn btn-light-danger btn-sm mb-2' onClick={handleCancel}>
+                          Cancel
+                        </Button>
+                      </Space>
+                      {/* <label htmlFor="member-select">Player: </label> */}
+                      <Form.Item
+                        name='selectDropDown'
+                        rules={[{required: true, message: 'Please select member'}]}
+                      >
+                        <Select
+                          placeholder='Select Member'
+                          // onChange={(value) => memberOnChange(value)}
+                          onChange={handleOnChange}
+                          className='w-100 mb-2'
+                        >
+                          {/* <option value='' disabled>
+                          Select Player
+                        </option> */}
+                          {members?.map((member: any) => (
+                            <Option key={member.id} value={member.id}>
+                              {member.fname}
+                              {member.lname}-{member.code}
+                            </Option>
+                          ))}
+                        </Select>
                       </Form.Item>
                     </Form>
                     <div
@@ -1302,50 +1500,69 @@ const TeeSheet = () => {
                     >
                       {4 - slotData?.length === 0 ? (
                         <>
-                          <p className='p-1 text-white h1'>List of players is full</p>
+                          <p className='p-1 text-white h1 m-2'>List of players is full</p>
                         </>
                       ) : (
                         <>
                           <p className='p-1'>Players left: </p>
                           <span className='font-bold h2 text-white '>
-                       
-                            <span className="badge bg-primary p-3 font-bold fs-5">{4 - slotData.length}</span>
+                            <span
+                              className='badge  p-3 font-bold fs-5 text-primary'
+                              style={{backgroundColor: 'white'}}
+                            >
+                              {4 - slotData.length}
+                            </span>
                           </span>
                         </>
                       )}
                     </div>
-                    <Table
-                      columns={columns}
-                      dataSource={slotData}
-                      loading={isLoading}
-                      className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
-                    />
+                    <Table columns={columns} dataSource={slotData} className='' />
                   </Tabs.TabPane>
                   <Tabs.TabPane tab='Non-Member' key='NonMember'>
-                    <Form onFinish={onFinish}>
-                      <Form.Item name='playerName' label='Name'>
+                    <Form onFinish={onFinish} form={nonMemberForm}>
+                      <Space>
+                        <Button
+                          type='primary'
+                          className='menu-title btn-success mb-2'
+                          onClick={handleNonMemberSubmit}
+                        >
+                          Ok
+                        </Button>
+
+                        <Button className='btn btn-light-danger btn-sm mb-2' onClick={handleCancel}>
+                          Cancel
+                        </Button>
+                      </Space>
+                      <Form.Item
+                        name='playerName'
+                        label='Name'
+                        rules={[{required: true, message: 'Please input your name!'}]}
+                      >
                         <Input
                           placeholder='Name'
                           prefix={<UserOutlined className='site-form-item-icon' />}
                         />
                       </Form.Item>
-                      <Form.Item name='playerEmail' label='Email'>
+                      <Form.Item
+                        name='playerEmail'
+                        label='Email'
+                        rules={[{required: true, message: 'Please input your email!'}]}
+                      >
                         <Input
                           type='email'
                           placeholder='Email'
                           prefix={<MailOutlined className='site-form-item-icon' />}
                         />
                       </Form.Item>
-                      <Form.Item>
+                      <Space size='middle'>
                         <Button
                           type='primary'
                           htmlType='submit'
-                          className='menu-title'
-                          style={{backgroundColor: '#47be7d'}}
+                          className='menu-title btn-success mb-2'
                         >
                           Submit
                         </Button>
-                      </Form.Item>
+                      </Space>
                     </Form>
 
                     <div
@@ -1360,74 +1577,54 @@ const TeeSheet = () => {
                         <>
                           <p className='p-1'>Players left: </p>
                           <span className='font-bold p-1 h2 text-white '>
-                        
-                            <span className="badge bg-primary p-3 font-bold fs-5">{4 - slotData.length}</span>
-                            
+                            <span
+                              className='badge  p-3 font-bold fs-5 text-primary'
+                              style={{backgroundColor: 'white'}}
+                            >
+                              {4 - slotData.length}
+                            </span>
                           </span>
                         </>
                       )}
                     </div>
-                    <Table
-                      columns={columns}
-                      className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
-                      dataSource={slotData}
-                    />
+                    <Table columns={columns} className='' dataSource={slotData} />
                   </Tabs.TabPane>
                   <Tabs.TabPane tab='Caddy' key='Caddy'>
-                    <Form form={form}>
-                      <Select
-                        placeholder='Select Caddy'
-                        // onChange={(value) => memberOnChange(value)}
-                        onChange={handleOnChangeCaddy}
-                        className='w-100 m-1'
-                      >
-                        <option value='' disabled>
-                          Select Caddy
-                        </option>
-                        {allCaddies?.data.map((caddy: any) => (
-                          <Option key={caddy.id} value={caddy.id}>
-                            {caddy.fname}
-                            {caddy.lname}-{caddy.code}
-                          </Option>
-                        ))}
-                      </Select>
-
-                      <Select
-                        id='member-select'
-                        placeholder='Select Member'
-                        // onChange={(value) => memberOnChange(value)}
-                        onChange={handleOnChange}
-                        className='w-100 m-1 mb-2'
-                      >
-                        <option value='' disabled>
-                          Select Player
-                        </option>
-                        {members?.map((member: any) => (
-                          <Option key={member.id} value={member.id}>
-                            {member.fname}
-                            {member.lname}-{member.code}
-                          </Option>
-                        ))}
-                      </Select>
-
-                      <Form.Item>
+                    <Form form={caddForm}>
+                      <Space>
                         <Button
                           type='primary'
                           htmlType='submit'
-                          className='menu-title'
-                          style={{backgroundColor: '#47be7d'}}
+                          className='menu-title btn-success mb-2'
+                          onClick={handleCaddyOnSubmit}
                         >
-                          Submit
+                          Ok
                         </Button>
+                        <Button className='btn btn-light-danger btn-sm mb-2' onClick={handleCancel}>
+                          Cancel
+                        </Button>
+                      </Space>
+                      <Form.Item
+                        name='caddselectdropdown'
+                        rules={[{required: true, message: 'Please select caddy!'}]}
+                      >
+                        <Select
+                          placeholder='Select Caddy'
+                          // onChange={(value) => memberOnChange(value)}
+                          onChange={handleOnChangeCaddy}
+                          className='w-100 m-1'
+                        >
+                          {allCaddies?.data.map((caddy: any) => (
+                            <Option key={caddy.id} value={caddy.id}>
+                              {caddy.fname}
+                              {caddy.lname}-{caddy.code}
+                            </Option>
+                          ))}
+                        </Select>
                       </Form.Item>
                     </Form>
 
-                    <Table
-                      columns={caddyColumns}
-                      dataSource={caddyArray}
-                      loading={isLoading}
-                      className='table-responsive table-responsive-{sm | md | lg | xl | xxl}'
-                    />
+                    <Table columns={caddyColumns} dataSource={allCaddyData} className='' />
                   </Tabs.TabPane>
                 </Tabs>
 

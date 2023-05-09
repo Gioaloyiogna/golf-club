@@ -39,6 +39,9 @@ export const updateCaddySlotsApi:any=(data:any)=>{
 export const getAllTees= () => {
   return axios.get(`${API_URL}/GameTeeSlots`)
 }
+export const getAllCaddiesTees=()=>{
+  return axios.get(`${API_URL}/CaddyTees`)
+}
 
 // export const fetchDataperDate=(teeDate:string)=>{
 //   axios.get(`${API_URL}/CellCount/${teeDate}`).then(res=>console.log('data',res.data)).catch((error)=>{
@@ -49,13 +52,13 @@ export const getAllTees= () => {
 export const fetchTees = () => {
   return axios.get(`${API_URL}/CellCount`)
 }
-// Deactivating members
-// export const deactivateUserApi=(id: any)=>{
-//   axios.post(`${API_URL}/ActivationMembers?id=${id}`)
-//   .then((response)=>{console.log(response.data);
-//     console.log(response.status);
-//   });
+// Deleting tee per
 
-  
-  
-// }
+export const deletePlayerApi=(values:any)=>{
+  axios.delete(`${API_URL}/TeeSlots/${values.id}/${values.teeTime}`)
+    
+}
+export const deleteNonMemberPlayerApi=(values:any)=>{
+  axios.delete(`${API_URL}/ NonMemberTeeSlots/${values.playerEmail}/${values.teeTime}`)
+ 
+}

@@ -95,9 +95,9 @@ export function Login() {
       {/* end::Form group */}
       {/* begin::Form group */}
       <div className='fv-row mb-10'>
-        <label className='form-label fs-6 fw-bolder text-dark'>USER ID</label>
+        <label className='form-label fs-6 fw-bolder text-dark'>USER EMAIL</label>
         <input
-          placeholder='User ID'
+          placeholder='YOUR EMAIL'
           {...formik.getFieldProps('email')}
           className={clsx(
             'form-control form-control-lg form-control-solid',
@@ -126,13 +126,13 @@ export function Login() {
             <label className='form-label fw-bolder text-dark fs-6 mb-0'>CODE</label>
             {/* end::Label */}
             {/* begin::Link */}
-            <Link
+            {/* <Link
               to='/auth/forgot-password'
               className='fs-6 fw-bolder'
               style={{marginLeft: '5px', color: '#09e85e !important'}}
             >
               Forgot Code ?
-            </Link>
+            </Link> */}
             {/* end::Link */}
           </div>
         </div>
