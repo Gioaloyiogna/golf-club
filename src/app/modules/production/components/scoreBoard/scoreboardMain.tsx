@@ -9,7 +9,7 @@ import {PageLink, PageTitle} from '../../../../../_metronic/layout/core'
 import {useQuery} from 'react-query'
 import {getAllTees, getPlayers} from '../Requests'
 import {AlipayCircleFilled, CiCircleFilled, CiCircleOutlined} from '@ant-design/icons'
-
+//  score board main
 const ScoreBoardMain = () => {
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
   const {data: teeSlotData} = useQuery('slotsQuery', () => getAllTees())
