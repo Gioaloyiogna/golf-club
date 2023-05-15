@@ -54,7 +54,7 @@ const ProductionPage: React.FC = () => {
         element={
           <>
             <PageTitle breadcrumbs={accountBreadCrumbs}>ScoreBoard</PageTitle>
-            <ScoreBoardMain />
+         <ScoreBoardMain/>
           </>
         }
       />
@@ -63,7 +63,7 @@ const ProductionPage: React.FC = () => {
         element={
           <>
             <PageTitle breadcrumbs={accountBreadCrumbs}>ScoreBoard </PageTitle>
-            <ScoreBoard />
+            <ScoreBoard/>
           </>
         }
       />
@@ -87,6 +87,7 @@ const ProductionPage: React.FC = () => {
       >
         <Route
           path='course-setup/*'
+
           element={
             <>
               {/*<PageTitle breadcrumbs={accountBreadCrumbs}>Course Setup</PageTitle>*/}
