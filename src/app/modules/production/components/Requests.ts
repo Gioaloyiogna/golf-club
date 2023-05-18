@@ -62,3 +62,7 @@ export const deleteNonMemberPlayerApi=(values:any)=>{
   axios.delete(`${API_URL}/ NonMemberTeeSlots/${values.playerEmail}/${values.teeTime}`)
  
 }
+// Fetch all gameschedules api
+export const allGameScheduleApi=()=>{
+  return axios.get(`${API_URL}/GameSchedules`)
+}

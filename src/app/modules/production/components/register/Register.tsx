@@ -1,4 +1,4 @@
-import {Button, Dropdown, Input, MenuProps, Space, Table, Modal, message, Form} from 'antd'
+import {Button, Dropdown, Input, MenuProps, Space, Table, Modal, message, Form, Select} from 'antd'
 import {useEffect, useState} from 'react'
 import {Link, Route, Routes} from 'react-router-dom'
 import {KTCard, KTCardBody, KTSVG} from '../../../../../_metronic/helpers'
@@ -64,7 +64,7 @@ const Register = () => {
     },
   ]
   const columns: any = [
-     {
+    {
       title: 'Membership ID',
       sorter: (a: any, b: any) => {
         if (a.txmanf > b.txmanf) {
@@ -77,14 +77,14 @@ const Register = () => {
       },
       dataIndex: 'code',
     },
-   
+
     {
       title: 'Picture',
       dataIndex: 'picture',
       //sort default order of data by dataindex id
       sorter: (a: any, b: any) => a.id - b.id,
     },
-   
+
     {
       title: 'First Name',
       sorter: (a: any, b: any) => {
@@ -106,7 +106,6 @@ const Register = () => {
     {
       title: 'Phone Number',
       dataIndex: 'phone',
-      
     },
     {
       title: 'Email',
@@ -137,13 +136,26 @@ const Register = () => {
       render: (record: any) => {
         return (
           <>
-            
-        <Space size='middle'>
-        <a href="#" className='btn btn-light-warning btn-sm' onClick={() => editMember(record)}>Update</a>
-        <a href="#" className='btn btn-light-primary btn-sm' onClick={() => activateUser(record.id)}>Activate</a>
-        <a href="#" className='btn btn-light-danger btn-sm'>Deactivate</a>
-      </Space>
-          </> 
+            <Space size='middle'>
+              <a
+                href='#'
+                className='btn btn-light-warning btn-sm'
+                onClick={() => editMember(record)}
+              >
+                Update
+              </a>
+              <a
+                href='#'
+                className='btn btn-light-primary btn-sm'
+                onClick={() => activateUser(record.id)}
+              >
+                Activate
+              </a>
+              <a href='#' className='btn btn-light-danger btn-sm'>
+                Deactivate
+              </a>
+            </Space>
+          </>
         )
       },
     },
@@ -157,7 +169,7 @@ const Register = () => {
       const filteredData = query?.data.filter((item: any) => {
         return (
           item.fname.toLowerCase().includes(value.toLowerCase()) ||
-          item.lname.toLowerCase().includes(value.toLowerCase())||
+          item.lname.toLowerCase().includes(value.toLowerCase()) ||
           item.email.toLowerCase().includes(value.toLowerCase())
         )
       })
@@ -215,17 +227,16 @@ const Register = () => {
   const editMember = (record: any) => {
     // setEditMemberDetails({...record})
     form.setFieldsValue({
-      id:record.id,
+      id: record.id,
       fname: record.fname,
-      lname:record.lname,
-      email:record.email,
-      gender:record.gender,
-      DOB:record.DOB,
-      playerHandicap:record.playerHandicap,
-      ggaid:record.ggaid,
-      status:record.status,
-      picture:record.picture
-
+      lname: record.lname,
+      email: record.email,
+      gender: record.gender,
+      DOB: record.DOB,
+      playerHandicap: record.playerHandicap,
+      ggaid: record.ggaid,
+      status: record.status,
+      picture: record.picture,
     })
     // form.resetFields()
     queryClient.invalidateQueries('membersQuery')
@@ -236,12 +247,10 @@ const Register = () => {
     Modal.confirm({
       title: 'Are you sure you want to save the records?',
       content: 'This action cannot be undone',
-      okText: 'Yes',  
+      okText: 'Yes',
       okType: 'primary',
       cancelText: 'No',
       onOk() {
-     
-
         upDateMember(values, {
           onSuccess: () => {
             setIsEditing(false)
@@ -297,6 +306,7 @@ const Register = () => {
                   bordered
                   loading={isLoading}
                   dataSource={members?.data}
+                
                 />
                 <Modal
                   title='Edit Member'
@@ -313,7 +323,6 @@ const Register = () => {
                     onFinish={onFinish}
                     {...layout}
                     name='control-hooks'
-                    
                   >
                     <Form.Item hidden={true} name={'id'} hasFeedback>
                       <Input value={editMemberDetails?.id} disabled={false} type='hidden' />
@@ -324,7 +333,11 @@ const Register = () => {
                       name={'fname'}
                       hasFeedback
                     >
-                      <Input value={editMemberDetails?.fname} disabled={false}    style={{color:'gray', fontSize:"0.9rem"}} />
+                      <Input
+                        value={editMemberDetails?.fname}
+                        disabled={false}
+                        style={{color: 'gray', fontSize: '0.9rem'}}
+                      />
                     </Form.Item>
                     <Form.Item
                       label='Last Name'
@@ -332,7 +345,11 @@ const Register = () => {
                       name={'lname'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter Last Name' value={editMemberDetails?.lname} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}}   />
+                      <Input
+                        placeholder='Enter Last Name'
+                        value={editMemberDetails?.lname}
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      />
                     </Form.Item>
 
                     <Form.Item
@@ -341,16 +358,45 @@ const Register = () => {
                       name={'email'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter Email' value={editMemberDetails?.email} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} />
+                      <Input
+                        placeholder='Enter Email'
+                        value={editMemberDetails?.email}
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      />
                     </Form.Item>
                     <Form.Item
+                        name={'gender'}
+                        label='Gender'
+                        rules={[{required: true, message: 'Please input your Gender!'}]}
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      >
+                        <Select
+                          placeholder='Select Gender'
+                          style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          // onChange={(value) => memberOnChange(value)}
+                          // onChange={handleOnChange}
+                          className='w-100 mb-2'
+                          options={[
+                            { value: 'Male', label: 'Male' },
+                            { value: 'Female', label: 'Female' }
+                          ]}
+                        >
+                          
+                        </Select>
+                      </Form.Item>
+
+                    {/* <Form.Item
                       label='Gender'
                       rules={[{required: true, message: 'Please input your Gender!'}]}
                       name={'gender'}
                       hasFeedback
                     >
-                      <Input placeholder='input placeholder' value={editMemberDetails?.gender} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} />
-                    </Form.Item>
+                      <Input
+                        placeholder='input placeholder'
+                        value={editMemberDetails?.gender}
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      />
+                    </Form.Item> */}
                     <Form.Item
                       label='Date OF Birth'
                       rules={[{required: true, message: 'Please input your date of birth!'}]}
@@ -361,7 +407,7 @@ const Register = () => {
                         placeholder='Enter Last Name'
                         defaultValue={editMemberDetails?.DOB}
                         type='date'
-                        style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} 
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
                       />
                     </Form.Item>
                     <Form.Item
@@ -374,7 +420,7 @@ const Register = () => {
                         placeholder='Enter Last Player Handicap'
                         value={editMemberDetails?.playerHandicap}
                         type='number'
-                        style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} 
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
                       />
                     </Form.Item>
                     <Form.Item
@@ -383,7 +429,11 @@ const Register = () => {
                       name={'ggaid'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter your GGAID' value={editMemberDetails?.ggaid} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}}   />
+                      <Input
+                        placeholder='Enter your GGAID'
+                        value={editMemberDetails?.ggaid}
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      />
                     </Form.Item>
                     <Form.Item
                       label='Status'
@@ -391,7 +441,11 @@ const Register = () => {
                       name={'status'}
                       hasFeedback
                     >
-                      <Input placeholder='Enter Satus' value={editMemberDetails?.status} style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} />
+                      <Input
+                        placeholder='Enter Satus'
+                        value={editMemberDetails?.status}
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      />
                     </Form.Item>
                     <Form.Item
                       label='Picture'
@@ -400,11 +454,9 @@ const Register = () => {
                       //hasFeedback
                     >
                       <Input
-                        placeholder='Enter Satus'
-                        value={editMemberDetails?.status}
+                        value={editMemberDetails?.picture}
                         type='file'
-                        style={{color:'gray', fontSize:"0.9rem", fontWeight:'lighter'}} 
-                      
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
                       />
                     </Form.Item>
                     <Form.Item {...tailLayout}>

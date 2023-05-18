@@ -157,7 +157,7 @@ const ScoreBoardMain = () => {
           <div className='d-flex justify-content-between'>
             <Space style={{marginBottom: 16}}>
               <Input
-                placeholder='Enter Search Text'
+                placeholder='Search tee time'
                 type='text'
                 onChange={handleInputChange}
                 allowClear

@@ -7,42 +7,95 @@ import {Button, Form, Input, message, Select, Upload} from 'antd'
 import {useMutation, useQueryClient} from 'react-query'
 import {postMember} from '../../Requests'
 import {useForm} from 'antd/es/form/Form'
+import axios from 'axios'
+import {API_URL} from '../../../../../urls'
 
 const Add = () => {
   // const [formData, setFormData] = useState({})
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [tempImage, setTempImage] = useState<any>()
   // const handleChange = (event: any) => {
   //   setFormData({...formData, [event.target.name]: event.target.value})
   // }
+  // const {mutate: updateCaddy} = useMutation((data: any) => updateCaddyApi(data))
+  const {mutate: addMember} = useMutation((data: any) => postMember(data))
 
-  const {mutate: addMember} = useMutation(postMember, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('membersQuery').then((r) => console.log('r', r))
-      message.success('Member added successfully')
-      form.resetFields()
-      setSubmitLoading(false)
-    },
-    onError: (error: any) => {
-      message.error(error.message).then((r) => console.log('r', r))
-      setSubmitLoading(false)
-    },
-  })
   const queryClient = useQueryClient()
-  const handleSubmit = (values: any) => {
-    setSubmitLoading(true)
-    const data = {
-      ...values,
-    }
-    // event.preventDefault()
-    console.log('formData', data)
-    // @ts-ignore
-    addMember(data)
-  }
-
   const [fileList, setFileList] = useState<UploadFile[]>([])
 
-  const onChange: UploadProps['onChange'] = ({fileList: newFileList}) => {
-    setFileList(newFileList)
+  const onFileChange = (e: any) => {
+    // Update the state
+    setTempImage(e.target.files[0])
+  }
+
+  const handleSubmit = (values: any) => {
+    // {
+    //   "id": 0,
+    //   "code": "1000",
+    //   "fname": "string",
+    //   "lname": "string",
+    //   "phone": "string",
+    //   "email": "gio.aloyiogna@gmail.com",
+    //   "gender": "string",
+    //   "dateOfBirth": "string",
+    //   "playerHandicap": "string",
+    //   "ggaid": "string",
+    //   "status": "string",
+    //   "picture": "string"
+    // }
+    let formData = new FormData()
+    formData.append('code', values.code)
+    formData.append('fname', values.fname)
+    formData.append('lname', values.lname)
+    formData.append('phone', values.phone)
+    formData.append('gender', values.gender)
+    formData.append('dateOfBirth', values.dateOfBirth)
+    formData.append('playerHandicap', values.playerHandicap)
+    formData.append('ggaid', values.ggaid)
+    formData.append('status', 'active')
+    formData.append('email', values.email)
+    formData.append('imageFile', tempImage)
+
+    // setSubmitLoading(true)
+    // const data = {
+    //   ...values,
+    // }
+    console.log(Object.fromEntries(formData))
+
+    const config = {
+      headers: {
+        'content-type': 'multipart/form-data',
+      },
+    }
+
+    const axiosConfig = {
+      ...config,
+      // Additional axios-specific configuration if needed
+    }
+    // const url1 = `${API_URL}/members`
+    // axios.post(url1, formData, config).then((response) => {
+    //   console.log(response.data);
+    //   // reset()
+    //   // loadData()
+    //   // setIsModalOpen(false)
+    // });
+
+    axios
+      .post(`${API_URL}/members`, formData, config)
+      .then((response) => {
+        // Handle success
+        queryClient.invalidateQueries('membersQuery')
+        message.success('Member added successfully')
+        form.resetFields()
+        setSubmitLoading(false)
+      })
+      .catch((error) => {
+        // Handle error
+        message.error(error.message).then((r) => console.log('r', r))
+        console.log(error.message)
+        setSubmitLoading(false)
+      })
+    // Pass the config object directly
   }
 
   // to preview the uploaded file
@@ -81,14 +134,21 @@ const Add = () => {
         <div>
           <div className='row mb-0'>
             <div className='col-6 mb-7'>
-              <Upload
+              {/* <Upload
                 listType='picture-card'
                 fileList={fileList}
                 onChange={onChange}
                 onPreview={onPreview}
               >
                 <UploadOutlined />
-              </Upload>
+              </Upload> */}
+              <Form.Item name='file'>
+                <input
+                  className='mb-3 btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary'
+                  onChange={onFileChange}
+                  type='file'
+                />
+              </Form.Item>
             </div>
           </div>
           <div className='row mb-0'>
@@ -96,7 +156,7 @@ const Add = () => {
               <label htmlFor='exampleFormControlInput1' className='required form-label'>
                 Membership ID
               </label>
-              <Form.Item name='membershipId'>
+              <Form.Item name='code'>
                 <Input type='text' required={true} className='form-control form-control-solid' />
               </Form.Item>
             </div>

@@ -2,12 +2,12 @@ import {Button, Card, Col, Form, Input, message, Modal, Row, Select, Space, Tabl
 import axios from 'axios'
 import {add} from 'date-fns'
 import styles from './Calendar.module.css'
-import {useEffect, useRef, useState} from 'react'
+import {Key, useEffect, useRef, useState} from 'react'
 import {KTCard, KTCardBody} from '../../../../../_metronic/helpers'
 import {API_URL, BASE_URL} from '../../../../urls'
 import {Outlet, Route, Routes, useNavigate, useParams} from 'react-router-dom'
 import {useForm} from 'antd/es/form/Form'
-import {DeleteOutlined, EditOutlined, MailOutlined, UserOutlined} from '@ant-design/icons'
+import {CrownOutlined, DeleteOutlined, EditOutlined, MailOutlined, UserOutlined} from '@ant-design/icons'
 import {DatePickerComponent} from '@syncfusion/ej2-react-calendars'
 import {useMutation, useQuery, useQueryClient} from 'react-query'
 import {id} from 'date-fns/locale'
@@ -17,6 +17,7 @@ import {log} from 'console'
 
 import {query} from 'express'
 import {
+  allGameScheduleApi,
   fetchTees,
   getAllCaddiesApi,
   getAllCaddiesTees,
@@ -152,7 +153,10 @@ const TeeSheet = () => {
   const {mutate: addCaddy} = useMutation((values: any) =>
     axios.post(`${API_URL}/CaddyTees`, values)
   )
+  // fetching all gameschedule query
+  const {data: allGameSchedule} = useQuery('allGameScheduleQuery', allGameScheduleApi)
 
+  // fetcing all tees query
   const {data: allExistingTees} = useQuery('allExistingTees', () => getPlayers())
 
   const [form] = Form.useForm()
@@ -299,7 +303,7 @@ const TeeSheet = () => {
 
   const handleCancel = () => {
     form.resetFields()
-    
+
     nonMemberForm.resetFields()
     caddForm.resetFields()
     setSlotData([])
@@ -389,7 +393,6 @@ const TeeSheet = () => {
     values.playerType = 'Non-member'
     values.availabilityStatus = 'yes'
     values.caddyId = '0'
-    console.log('values', values)
 
     const nonMemberExists = slotData.some((item: any) => item.playerEmail === values.playerEmail)
     if (nonMemberExists) {
@@ -515,11 +518,7 @@ const TeeSheet = () => {
     form.resetFields()
     nonMemberForm.resetFields()
     setOpen(true)
-  
-    //get row that was click
-    console.log('row', e.target.parentNode.rowIndex)
-    //get column that was click
-    console.log('column', e.target.cellIndex)
+
     setChosenTime(
       `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
         hour12: false,
@@ -570,10 +569,7 @@ const TeeSheet = () => {
   const getTeeByDate = allTees?.data.filter((item: any) => {
     return item.teeTime.includes(cellSelectedDate)
   })
-  // cell per time
-  const slotDa: any = getTeeByDate?.filter((item: any) => {
-    return item.teeTime.substr(11, 5) === '06:10'
-  })
+  
   //tees per time
   let newDat: any = []
   getNextTwoWeeksDates()
@@ -606,7 +602,7 @@ const TeeSheet = () => {
   useEffect(() => {
     setSlotData([])
     setallCaddyData([])
-    
+
     const data = getPlayersData?.data.filter((item: any) => {
       return item.teeTime == chosenTimeNotLate
     })
@@ -704,8 +700,6 @@ const TeeSheet = () => {
                 className='table table-rounded table-striped border gy-5 gs-5'
                 id={'myTable'}
                 onClick={(e) => {
-                  console.log('e', e)
-
                   clickCell(e, dateSelected)
                 }}
               >
@@ -1395,6 +1389,18 @@ const TeeSheet = () => {
                   {getNextTwoWeeksDates()
                     .slice(0, 7)
                     .map((item, index) => {
+                      let eventArr: any = []
+                      counter++
+                      const data = allGameSchedule?.data.filter((filterData: any) => {
+                        return (
+                          filterData.startTime.split('T')[0] == item.toISOString().split('T')[0]
+                        )
+                      })
+
+                      data?.forEach((element: any) => {
+                        eventArr.push(element.description)
+                      })
+
                       return (
                         <Col span={22}>
                           <Card
@@ -1405,7 +1411,14 @@ const TeeSheet = () => {
                             }}
                             className={styles.card}
                           >
-                            {newDat[index]}
+                             {/* <div className='d-flex justify-content-center mt-1'><CrownOutlined className='text-primary fs-6' /></div> */}
+                            <div>Total Tees:{newDat[index]}</div>
+                            
+                            {eventArr.map((event: any, index: any) => (
+                              <div key={index} className='fs-8 italic text-success p-1'>
+                               --{event}
+                              </div>
+                            ))}
                           </Card>
                         </Col>
                       )
@@ -1417,7 +1430,20 @@ const TeeSheet = () => {
                   {getNextTwoWeeksDates()
                     .slice(7, 14)
                     .map((item, index) => {
+                      let eventArr: any = []
                       counter++
+                      const data = allGameSchedule?.data.filter((filterData: any) => {
+                        return (
+                          filterData.startTime.split('T')[0] == item.toISOString().split('T')[0]
+                        )
+                      })
+
+                      data?.forEach((element: any) => {
+                        eventArr.push(element.description)
+                      })
+
+                     
+
                       return (
                         <Col span={22}>
                           <Card
@@ -1428,7 +1454,14 @@ const TeeSheet = () => {
                             }}
                             className={styles.card}
                           >
-                            {newDat[counter]}
+                           
+                            <div>Total Tees:{newDat[index]}</div>
+                             {/* <div className='d-flex justify-content-center mt-1'><CrownOutlined className='text-primary fs-8' /></div> */}
+                            {eventArr.map((event: any, index: any) => (
+                              <div key={index} className='fs-8 italic text-success p-1'>
+                               --{event}
+                              </div>
+                            ))}
                           </Card>
                         </Col>
                       )
@@ -1628,189 +1661,6 @@ const TeeSheet = () => {
                   </Tabs.TabPane>
                 </Tabs>
 
-                {/*
-                Splitting the date to remove the old time part and concatenate
-                the time from the tee sheet to it
-              */}
-                {/*<p>*/}
-                {/*  {`${modalContent.date.split("T")[0]} */}
-                {/*   ${teeSlot[(modalContent.rowIndex)-1][(modalContent.columnIndex)-1]}`}*/}
-                {/*</p>*/}
-                {/* <Form
-                  form={form}
-                  name='control-hooks'
-                  labelCol={{span: 8}}
-                  wrapperCol={{span: 14}}
-                  title='Book tee time'
-                  id='formelement'
-                >
-                  <Form.Item
-                    name='teeTime'
-                    label='Time'
-                    rules={[{required: true, message: 'Missing Host'}]}
-                    hidden={true}
-                  >
-                    <input type='date' name='' id='' value={dateSelected} />
-                  </Form.Item>
-                  <Form.Item
-                    name='hostMembership'
-                    label='Player 1'
-                    rules={[{required: true, message: 'Missing Host Membership'}]}
-                  >
-                    <Select
-                      options={memberships}
-                      onChange={(value) => handleChange(value)}
-                      placeholder={'Select'}
-                    />
-                  </Form.Item>
-                  {hostMembership === 'member' ? (
-                    <Form.Item
-                      name='playerId'
-                      label='Name'
-                      rules={[{required: true, message: 'Missing Host'}]}
-                    >
-                      <Select placeholder='Select Host' onChange={(value) => memberOnChange(value)}>
-                        {members.map((member: any) => (
-                          <Option key={member.id} value={member.id}>
-                            {member.fname}
-                            {member.lname}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  ) : hostMembership === 'non-member' ? (
-                    <>
-                      {' '}
-                      <Form.Item name='enteredHost' label='Name'>
-                        <Input
-                          placeholder='Name'
-                          prefix={<UserOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                      <Form.Item name='Email' label='Email'>
-                        <Input
-                          type='email'
-                          placeholder='Email'
-                          prefix={<MailOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                    </>
-                  ) : null}
-
-                  <Form.Item name='player2Membership' label='Player 2'>
-                    <Select
-                      options={memberships}
-                      onChange={(value) => handlePlayer2HostChange(value)}
-                      placeholder={'Select'}
-                    />
-                  </Form.Item>
-                  {player2Membership === 'member' ? (
-                    <Form.Item name='player2' label='Name'>
-                      <Select placeholder='Select Player2'>
-                        {members.map((member: any) => (
-                          <Option key={member.id} value={member.id}>
-                            {member.fname}
-                            {member.lname}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  ) : player2Membership === 'non-member' ? (
-                    <>
-                      <Form.Item name='enteredPlayer2' label='Name'>
-                        <Input
-                          placeholder='Name'
-                          prefix={<UserOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                      <Form.Item name='enteredHost' label='Email'>
-                        <Input
-                          type='email'
-                          placeholder='Email'
-                          prefix={<MailOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                    </>
-                  ) : null}
-
-                  <Form.Item name='player3Membership' label='Player 3'>
-                    <Select
-                      options={memberships}
-                      onChange={(value) => handlePlayer3HostChange(value)}
-                      placeholder={'Select'}
-                    />
-                  </Form.Item>
-                  {player3Membership === 'member' ? (
-                    <Form.Item name='player3' label='Name'>
-                      <Select placeholder='Select Player3'>
-                        {members.map((member: any) => (
-                          <Option key={member.id} value={member.id}>
-                            {member.fname}
-                            {member.lname}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  ) : player3Membership === 'non-member' ? (
-                    <>
-                      <Form.Item name='enteredPlayer3' label='Name'>
-                        <Input
-                          placeholder='Name'
-                          prefix={<UserOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                      <Form.Item name='enteredHost' label='Email'>
-                        <Input
-                          type='email'
-                          placeholder='Email'
-                          prefix={<MailOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                    </>
-                  ) : null}
-
-                  <Form.Item name='player4Membership' label='Player 4'>
-                    <Select
-                      options={memberships}
-                      onChange={(value) => handlePlayer4HostChange(value)}
-                      placeholder={'Select'}
-                    />
-                  </Form.Item>
-                  {player4Membership === 'member' ? (
-                    <Form.Item name='player4' label='Name'>
-                      <Select placeholder='Select Player4'>
-                        {members.map((member: any) => (
-                          <Option key={member.id} value={member.id}>
-                            {member.fname}
-                            {member.lname}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  ) : player4Membership === 'non-member' ? (
-                    <>
-                      <Form.Item name='enteredPlayer4' label='Name'>
-                        <Input
-                          placeholder='Name'
-                          prefix={<UserOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                      <Form.Item name='enteredHost' label='Email'>
-                        <Input
-                          type='email'
-                          placeholder='Email'
-                          prefix={<MailOutlined className='site-form-item-icon' />}
-                        />
-                      </Form.Item>
-                    </>
-                  ) : null}
-
-                  <Form.Item wrapperCol={{offset: 8, span: 16}}>
-                    <Button type='primary' htmlType='submit'>
-                      Submit
-                    </Button>
-                  </Form.Item>
-                </Form> */}
               </Modal>
             </Col>
           }
