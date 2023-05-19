@@ -27,6 +27,9 @@ const DashboardPage: FC = () => (
         />
       </div>
     </div>
+    <div className='row'>
+
+    </div>
     {/* end::Row */}
     {/*<div className='row gy-5 g-xl-8'>*/}
     {/*  <div className='col-xl-12'>*/}

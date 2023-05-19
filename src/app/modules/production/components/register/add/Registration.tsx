@@ -29,20 +29,7 @@ const Add = () => {
   }
 
   const handleSubmit = (values: any) => {
-    // {
-    //   "id": 0,
-    //   "code": "1000",
-    //   "fname": "string",
-    //   "lname": "string",
-    //   "phone": "string",
-    //   "email": "gio.aloyiogna@gmail.com",
-    //   "gender": "string",
-    //   "dateOfBirth": "string",
-    //   "playerHandicap": "string",
-    //   "ggaid": "string",
-    //   "status": "string",
-    //   "picture": "string"
-    // }
+
     let formData = new FormData()
     formData.append('code', values.code)
     formData.append('fname', values.fname)
@@ -56,11 +43,7 @@ const Add = () => {
     formData.append('email', values.email)
     formData.append('imageFile', tempImage)
 
-    // setSubmitLoading(true)
-    // const data = {
-    //   ...values,
-    // }
-    console.log(Object.fromEntries(formData))
+  
 
     const config = {
       headers: {
@@ -72,14 +55,7 @@ const Add = () => {
       ...config,
       // Additional axios-specific configuration if needed
     }
-    // const url1 = `${API_URL}/members`
-    // axios.post(url1, formData, config).then((response) => {
-    //   console.log(response.data);
-    //   // reset()
-    //   // loadData()
-    //   // setIsModalOpen(false)
-    // });
-
+ 
     axios
       .post(`${API_URL}/members`, formData, config)
       .then((response) => {
@@ -99,20 +75,20 @@ const Add = () => {
   }
 
   // to preview the uploaded file
-  const onPreview = async (file: UploadFile) => {
-    let src = file.url as string
-    if (!src) {
-      src = await new Promise((resolve) => {
-        const reader = new FileReader()
-        reader.readAsDataURL(file.originFileObj as RcFile)
-        reader.onload = () => resolve(reader.result as string)
-      })
-    }
-    const image = new Image()
-    image.src = src
-    const imgWindow = window.open(src)
-    imgWindow?.document.write(image.outerHTML)
-  }
+  // const onPreview = async (file: UploadFile) => {
+  //   let src = file.url as string
+  //   if (!src) {
+  //     src = await new Promise((resolve) => {
+  //       const reader = new FileReader()
+  //       reader.readAsDataURL(file.originFileObj as RcFile)
+  //       reader.onload = () => resolve(reader.result as string)
+  //     })
+  //   }
+  //   const image = new Image()
+  //   image.src = src
+  //   const imgWindow = window.open(src)
+  //   imgWindow?.document.write(image.outerHTML)
+  // }
   const [form] = useForm()
   const Option = Select.Option
   return (

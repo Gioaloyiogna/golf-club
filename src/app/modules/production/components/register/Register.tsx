@@ -1,7 +1,19 @@
-import {Button, Dropdown, Input, MenuProps, Space, Table, Modal, message, Form, Select} from 'antd'
+import {
+  Button,
+  Dropdown,
+  Input,
+  MenuProps,
+  Space,
+  Table,
+  Modal,
+  message,
+  Form,
+  Select,
+  UploadFile,
+} from 'antd'
 import {useEffect, useState} from 'react'
 import {Link, Route, Routes} from 'react-router-dom'
-import {KTCard, KTCardBody, KTSVG} from '../../../../../_metronic/helpers'
+import {KTCard, KTCardBody, KTSVG, toAbsoluteUrl} from '../../../../../_metronic/helpers'
 import Add from './add/Registration'
 import {PageLink, PageTitle} from '../../../../../_metronic/layout/core'
 import {Query, QueryClient, useMutation, useQuery, useQueryClient} from 'react-query'
@@ -16,7 +28,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons'
 import axios from 'axios'
-import {API_URL} from '../../../../urls'
+import {API_URL, PIC_URL} from '../../../../urls'
 
 const Register = () => {
   // const [gridData, setGridData] = useState([])
@@ -25,7 +37,9 @@ const Register = () => {
   const [messageApi, contextHolder] = message.useMessage()
   const [isEditing, setIsEditing] = useState(false)
   const [editMemberDetails, setEditMemberDetails] = useState<any>(null)
-  const [, setEditnewMemberDetails] = useState<any>(null)
+  const [modalPic, setModalPic] = useState<string>()
+  const [profilePic, setProfilePic] = useState<any>()
+  const [profilePicFile, setprofilePicFile] = useState<any>()
   const {mutate: upDateMember} = useMutation((data: any) =>
     axios.put(`${API_URL}/members/${data.id}`, data)
   )
@@ -65,6 +79,22 @@ const Register = () => {
   ]
   const columns: any = [
     {
+      title: 'Picture',
+      sorter: (a: any, b: any) => a.id - b.id,
+      render: (record: any) => (
+        <img
+          src={
+            record.picture
+              ? `${PIC_URL}/member/${record.picture}`
+              : `${toAbsoluteUrl('/media/avatars/blank.png')}`
+          }
+          alt='Picture'
+          style={{width: '50px'}}
+        />
+      ),
+    },
+
+    {
       title: 'Membership ID',
       sorter: (a: any, b: any) => {
         if (a.txmanf > b.txmanf) {
@@ -76,13 +106,6 @@ const Register = () => {
         return 0
       },
       dataIndex: 'code',
-    },
-
-    {
-      title: 'Picture',
-      dataIndex: 'picture',
-      //sort default order of data by dataindex id
-      sorter: (a: any, b: any) => a.id - b.id,
     },
 
     {
@@ -236,36 +259,124 @@ const Register = () => {
       playerHandicap: record.playerHandicap,
       ggaid: record.ggaid,
       status: record.status,
-      picture: record.picture,
+      // picture: record.picture,
     })
+    setModalPic(record.picture)
     // form.resetFields()
     queryClient.invalidateQueries('membersQuery')
     setIsEditing(true)
   }
-
+  //   {
+  //     "id": 111,
+  //     "fname": "string",
+  //     "lname": "string",
+  //     "email": "yassinehamadou1@mail.com",
+  //     "gender": "string",
+  //     "DOB": "2023-05-03",
+  //     "playerHandicap": "34",
+  //     "ggaid": "string",
+  //     "status": "Inactive",
+  //     "picture": "C:\\fakepath\\thato.jpg"
+  // }
   const onFinish = (values: any) => {
-    Modal.confirm({
-      title: 'Are you sure you want to save the records?',
-      content: 'This action cannot be undone',
-      okText: 'Yes',
-      okType: 'primary',
-      cancelText: 'No',
-      onOk() {
-        upDateMember(values, {
-          onSuccess: () => {
-            setIsEditing(false)
+    //  values.ImageFile=profilePicFile ? profilePicFile : null
+    // console.log(values);
 
-            message.success('Member updated successfully')
-            form.resetFields()
-            queryClient.invalidateQueries('membersQuery')
-          },
-          onError: (error: any) => {
-            message.error('Failed to update Member')
-          },
-        })
+    const config = {
+      headers: {
+        'content-type': 'multipart/form-data',
       },
+    }
+
+    const formData = new FormData()
+    formData.append('id', values.id)
+    formData.append('fname', values.fname)
+    formData.append('lname', values.lname)
+    formData.append('email', values.email)
+    formData.append('DOB', values.DOB)
+    formData.append('playerHandicap', values.playerHandicap)
+    formData.append('ggaid', values.ggaid)
+    formData.append('status', values.status)
+    formData.append('ImageFile', profilePicFile ? profilePicFile : null)
+
+    console.log('formdat', Object.fromEntries(formData))
+    axios
+      .put(`${API_URL}/members/${values.id}`, formData, config)
+      .then((response) => {
+        // Handle success
+        message.info('Member Updated successfully')
+        // Additional logic
+      })
+      .catch((error) => {
+        // Handle error
+        console.error(error)
+        // Additional error handling logic
+      })
+
+    // Modal.confirm({
+    //   title: 'Are you sure you want to save the records?',
+    //   content: 'This action cannot be undone',
+    //   okText: 'Yes',
+    //   okType: 'primary',
+    //   cancelText: 'No',
+    //   onOk() {
+    //     upDateMember(values, {
+    //       onSuccess: () => {
+    //         setIsEditing(false)
+
+    //         message.success('Member updated successfully')
+    //         form.resetFields()
+    //         queryClient.invalidateQueries('membersQuery')
+    //       },
+    //       onError: (error: any) => {
+    //         message.error('Failed to update Member')
+    //         console.log(error.message);
+
+    //       },
+    //     })
+    //   },
+    // })
+  }
+  // handle profile image on change
+  const handleProfileImage = async (e: any) => {
+    let file = e.target.files[0]
+    const base64 = await convertToBase64(file)
+    setProfilePic(base64)
+    setprofilePicFile(e.target.files[0])
+    setModalPic('')
+    e.target.files[0] = ''
+  }
+  const convertToBase64 = (file: any) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader()
+      if (!file) {
+        message.info('No file selected')
+      } else {
+        fileReader.readAsDataURL(file)
+        fileReader.onload = () => {
+          resolve(fileReader.result)
+        }
+        fileReader.onerror = (error) => {
+          reject(error)
+        }
+      }
     })
   }
+  // to preview the uploaded file
+  // const onPreview = async (file: UploadFile) => {
+  //   let src = file.url as string
+  //   if (!src) {
+  //     src = await new Promise((resolve) => {
+  //       const reader = new FileReader()
+  //       reader.readAsDataURL(file.originFileObj as RcFile)
+  //       reader.onload = () => resolve(reader.result as string)
+  //     })
+  //   }
+  //   const image = new Image()
+  //   image.src = src
+  //   const imgWindow = window.open(src)
+  //   imgWindow?.document.write(image.outerHTML)
+  // }
   return (
     <Routes>
       {/*index*/}
@@ -306,7 +417,6 @@ const Register = () => {
                   bordered
                   loading={isLoading}
                   dataSource={members?.data}
-                
                 />
                 <Modal
                   title='Edit Member'
@@ -365,25 +475,23 @@ const Register = () => {
                       />
                     </Form.Item>
                     <Form.Item
-                        name={'gender'}
-                        label='Gender'
-                        rules={[{required: true, message: 'Please input your Gender!'}]}
+                      name={'gender'}
+                      label='Gender'
+                      rules={[{required: true, message: 'Please input your Gender!'}]}
+                      style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                    >
+                      <Select
+                        placeholder='Select Gender'
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      >
-                        <Select
-                          placeholder='Select Gender'
-                          style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                          // onChange={(value) => memberOnChange(value)}
-                          // onChange={handleOnChange}
-                          className='w-100 mb-2'
-                          options={[
-                            { value: 'Male', label: 'Male' },
-                            { value: 'Female', label: 'Female' }
-                          ]}
-                        >
-                          
-                        </Select>
-                      </Form.Item>
+                        // onChange={(value) => memberOnChange(value)}
+                        // onChange={handleOnChange}
+                        className='w-100 mb-2'
+                        options={[
+                          {value: 'Male', label: 'Male'},
+                          {value: 'Female', label: 'Female'},
+                        ]}
+                      ></Select>
+                    </Form.Item>
 
                     {/* <Form.Item
                       label='Gender'
@@ -447,16 +555,30 @@ const Register = () => {
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
                       />
                     </Form.Item>
+                    <div style={{paddingLeft: '33%', paddingBottom: '1rem'}}>
+                      {modalPic && (
+                        <img src={`${PIC_URL}/member/${modalPic}`} alt='' style={{width: '50px'}} />
+                      )}
+                      {profilePic && <img src={profilePic} alt='' style={{width: '50px'}} />}
+                      {!modalPic && !profilePic && (
+                        <img
+                          src={toAbsoluteUrl('/media/avatars/blank.png')}
+                          alt=''
+                          style={{width: '50px'}}
+                        />
+                      )}
+                    </div>
                     <Form.Item
                       label='Picture'
                       // rules={[{required: true, message: 'Please upload file!'}]}
-                      name={'picture'}
+                      name={'ImageFile'}
                       //hasFeedback
                     >
                       <Input
                         value={editMemberDetails?.picture}
                         type='file'
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                        onChange={handleProfileImage}
                       />
                     </Form.Item>
                     <Form.Item {...tailLayout}>

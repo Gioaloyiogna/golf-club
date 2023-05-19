@@ -19,7 +19,7 @@ const loginSchema = Yup.object().shape({
 const initialValues = {
   email: 'User ID',
   code: 'admin',
-  role: 'caddy',
+  role: 'member',
 }
 
 /*
