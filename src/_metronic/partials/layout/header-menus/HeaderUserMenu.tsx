@@ -2,9 +2,18 @@
 import {FC} from 'react'
 import {useAuth} from '../../../../app/modules/auth'
 import {toAbsoluteUrl} from '../../../helpers'
+import { useQuery } from 'react-query'
+import { getMembers } from '../../../../app/modules/production/components/Requests'
+import { PIC_URL } from '../../../../app/urls'
 
 const HeaderUserMenu: FC = () => {
   const {currentUser, logout} = useAuth()
+ const {data:currentUserData}=useQuery('currentUserQuery', ()=>getMembers())
+ const currentUserFilteredData=currentUserData?.data.filter((item:any)=>{
+   return item.email===currentUser?.Email
+ })
+
+//  {currentUserFilteredData[0]?.picture?`${PIC_URL}/member/${currentUserFilteredData[0]?.picture}`:
   return (
     <div
       className='menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg menu-state-primary fw-bold py-4 fs-6 w-275px'

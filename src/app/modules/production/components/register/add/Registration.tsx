@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {Link} from 'react-router-dom'
 import './formStyle.css'
 import type {RcFile, UploadFile, UploadProps} from 'antd/es/upload/interface'
@@ -18,7 +18,7 @@ const Add = () => {
   //   setFormData({...formData, [event.target.name]: event.target.value})
   // }
   // const {mutate: updateCaddy} = useMutation((data: any) => updateCaddyApi(data))
-  const {mutate: addMember} = useMutation((data: any) => postMember(data))
+  // const {mutate: addMember} = useMutation((data: any) => postMember(data))
 
   const queryClient = useQueryClient()
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -29,7 +29,6 @@ const Add = () => {
   }
 
   const handleSubmit = (values: any) => {
-
     let formData = new FormData()
     formData.append('code', values.code)
     formData.append('fname', values.fname)
@@ -43,25 +42,19 @@ const Add = () => {
     formData.append('email', values.email)
     formData.append('imageFile', tempImage)
 
-  
-
     const config = {
       headers: {
         'content-type': 'multipart/form-data',
       },
     }
 
-    const axiosConfig = {
-      ...config,
-      // Additional axios-specific configuration if needed
-    }
- 
     axios
       .post(`${API_URL}/members`, formData, config)
       .then((response) => {
         // Handle success
-        queryClient.invalidateQueries('membersQuery')
+       
         message.success('Member added successfully')
+        queryClient.invalidateQueries('membersQuery')
         form.resetFields()
         setSubmitLoading(false)
       })
@@ -73,6 +66,7 @@ const Add = () => {
       })
     // Pass the config object directly
   }
+  useEffect(() => {}, [])
 
   // to preview the uploaded file
   // const onPreview = async (file: UploadFile) => {
@@ -159,7 +153,7 @@ const Add = () => {
               <label htmlFor='exampleFormControlInput1' className='required form-label'>
                 Date of Birth
               </label>
-              <Form.Item name='dateOfBirth'>
+              <Form.Item name='dateOfBirth' style={{width:'30%'}}>
                 <Input type='date' required={true} className='form-control form-control-solid' />
               </Form.Item>
             </div>
@@ -169,7 +163,8 @@ const Add = () => {
               <label htmlFor='exampleFormControlInput1' className='form-label'>
                 Gender
               </label>
-              <Form.Item name='gender'>
+              
+              <Form.Item name='gender' style={{width:'30%'}}>
                 <Select className={'form-select form-select-solid'}>
                   <Option value='male'>MALE</Option>
                   <Option value='female'>FEMALE</Option>
@@ -217,15 +212,7 @@ const Add = () => {
             </div>
           </div>
         </div>
-        <Button
-          type='primary'
-          key='submit'
-          htmlType='submit'
-          loading={submitLoading}
-          onClick={() => {
-            form.submit()
-          }}
-        >
+        <Button type='primary' key='submit' htmlType='submit' loading={submitLoading}>
           Submit
         </Button>
       </Form>

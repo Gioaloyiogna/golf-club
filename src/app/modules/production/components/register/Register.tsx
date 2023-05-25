@@ -105,7 +105,7 @@ const Register = () => {
         }
         return 0
       },
-      dataIndex: 'code',
+      dataIndex: 'membershipId',
     },
 
     {
@@ -174,7 +174,11 @@ const Register = () => {
               >
                 Activate
               </a>
-              <a href='#' className='btn btn-light-danger btn-sm'>
+              <a
+                href='#'
+                className='btn btn-light-danger btn-sm'
+                onClick={() => deactivateUser(record.id)}
+              >
                 Deactivate
               </a>
             </Space>
@@ -259,6 +263,8 @@ const Register = () => {
       playerHandicap: record.playerHandicap,
       ggaid: record.ggaid,
       status: record.status,
+      membershipId: record.membershipId,
+      phone: record.phone,
       // picture: record.picture,
     })
     setModalPic(record.picture)
@@ -289,14 +295,17 @@ const Register = () => {
     }
 
     const formData = new FormData()
-    formData.append('id', values.id)
-    formData.append('fname', values.fname)
-    formData.append('lname', values.lname)
-    formData.append('email', values.email)
-    formData.append('DOB', values.DOB)
-    formData.append('playerHandicap', values.playerHandicap)
-    formData.append('ggaid', values.ggaid)
-    formData.append('status', values.status)
+    formData.append('Id', values.id)
+    formData.append('MembershipId', values.membershipId)
+    formData.append('Fname', values.fname)
+    formData.append('Lname', values.lname)
+    formData.append('Email', values.email)
+    formData.append('DateOfBirth', values.DOB)
+    formData.append('PlayerHandicap', values.playerHandicap)
+    formData.append('Ggaid', values.ggaid)
+    formData.append('Status', values.status)
+    formData.append('Phone', values.phone)
+    formData.append('Gender', values.gender)
     formData.append('ImageFile', profilePicFile ? profilePicFile : null)
 
     console.log('formdat', Object.fromEntries(formData))
@@ -305,12 +314,14 @@ const Register = () => {
       .then((response) => {
         // Handle success
         message.info('Member Updated successfully')
-        // Additional logic
+        queryClient.invalidateQueries('membersQuery')
+        form.resetFields()
+        setIsEditing(false)
+        setModalPic('')
+        setProfilePic('')
       })
       .catch((error) => {
-        // Handle error
-        console.error(error)
-        // Additional error handling logic
+        message.info('Updating member failed. Email, Ggaid or Membership Id already taken.')
       })
 
     // Modal.confirm({
@@ -362,6 +373,12 @@ const Register = () => {
       }
     })
   }
+  const closeModal = () => {
+    setModalPic('')
+    setProfilePic('')
+    setIsEditing(false)
+  }
+
   // to preview the uploaded file
   // const onPreview = async (file: UploadFile) => {
   //   let src = file.url as string
@@ -421,7 +438,7 @@ const Register = () => {
                 <Modal
                   title='Edit Member'
                   open={isEditing}
-                  onCancel={() => setIsEditing(false)}
+                  onCancel={closeModal}
                   closable={true}
                   footer={null}
                 >
@@ -470,6 +487,18 @@ const Register = () => {
                     >
                       <Input
                         placeholder='Enter Email'
+                        value={editMemberDetails?.email}
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label='MemberShip'
+                      rules={[{required: true, message: 'Please input your membership id!'}]}
+                      name={'membershipId'}
+                      hasFeedback
+                    >
+                      <Input
+                        placeholder='Enter Membership'
                         value={editMemberDetails?.email}
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
                       />
@@ -532,6 +561,19 @@ const Register = () => {
                       />
                     </Form.Item>
                     <Form.Item
+                      label='Phone'
+                     
+                      name={'phone'}
+                      hasFeedback
+                    >
+                      <Input
+                        placeholder='Enter Phone'
+                        value={editMemberDetails?.playerHandicap}
+                        type='number'
+                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                      />
+                    </Form.Item>
+                    <Form.Item
                       label='GGAID'
                       rules={[{required: true, message: 'Please input your GGAID!'}]}
                       name={'ggaid'}
@@ -569,15 +611,17 @@ const Register = () => {
                       )}
                     </div>
                     <Form.Item
-                      label='Picture'
+                      label='Profile Picture'
                       // rules={[{required: true, message: 'Please upload file!'}]}
                       name={'ImageFile'}
                       //hasFeedback
                     >
+                      
                       <Input
                         value={editMemberDetails?.picture}
                         type='file'
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                         
                         onChange={handleProfileImage}
                       />
                     </Form.Item>

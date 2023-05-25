@@ -61,7 +61,7 @@ export function AsideMenuMain() {
       >
         <AsideMenuItem
           to='/reports/members-report'
-          title='Members report'
+          title='Member List Report'
           fontIcon='bi-archive'
           icon='/media/icons/duotune/communication/com014.svg'
           hasBullet={false}

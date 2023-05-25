@@ -224,10 +224,20 @@ const Calendar = () => {
   }
 
   let onCellClick = (args) => {
-    // scheduleObj?.openEditor(args, 'Add', false) //open the editor on empty cell click
-    //do not open the quick info popup on cell click
-    args.cancel = true
-    scheduleObj?.openEditor(args, 'Add', false)
+    const today = new Date(Date.now())
+    const startTime=new Date(args.startTime)
+    if (today<=startTime) {
+      args.cancel = true
+      scheduleObj?.openEditor(args, 'Add', false)
+    }
+    else{
+      args.cancel = true
+     message.info('Cannot set events for past days!')
+
+     
+    }
+    
+   
   }
 
   return calendarData !== undefined ? (

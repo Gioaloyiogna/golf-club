@@ -7,7 +7,13 @@ import {KTCard, KTCardBody} from '../../../../../_metronic/helpers'
 import {API_URL, BASE_URL} from '../../../../urls'
 import {Outlet, Route, Routes, useNavigate, useParams} from 'react-router-dom'
 import {useForm} from 'antd/es/form/Form'
-import {CrownOutlined, DeleteOutlined, EditOutlined, MailOutlined, UserOutlined} from '@ant-design/icons'
+import {
+  CrownOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  MailOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import {DatePickerComponent} from '@syncfusion/ej2-react-calendars'
 import {useMutation, useQuery, useQueryClient} from 'react-query'
 import {id} from 'date-fns/locale'
@@ -66,23 +72,34 @@ const TeeSheet = () => {
       render: (record: any) => {
         return (
           <>
-            <Space size='middle'>
-              <a
-                href='#'
-                className='btn btn-light-danger btn-sm'
-                onClick={() =>
-                  deletePlayer(
-                    record.id,
-                    record.teeTime,
-                    record.memberId,
-                    record.playerType,
-                    record.playerEmail
-                  )
-                }
-              >
-                Delete
-              </a>
-            </Space>
+            <div className='d-flex'>
+              <Space size='middle'>
+                <a
+                  href='#'
+                  className='btn btn-light-danger btn-sm'
+                  onClick={() =>
+                    deletePlayer(
+                      record.id,
+                      record.teeTime,
+                      record.memberId,
+                      record.playerType,
+                      record.playerEmail
+                    )
+                  }
+                >
+                  Delete
+                </a>
+              </Space>
+              <Space size='middle' className='mx-1'>
+                <a
+                  href='#'
+                  className='btn btn-light-primary btn-sm'
+                  onClick={() => addCaddyPerPlayer(record.memberId)}
+                >
+                  Caddy
+                </a>
+              </Space>
+            </div>
           </>
         )
       },
@@ -132,6 +149,7 @@ const TeeSheet = () => {
   // Modal state and function //
   //////////////////////////////
   const [open, setOpen] = useState(false)
+  const [openCaddy, setOpenCaddy] = useState(false)
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [members, setMembers] = useState<any>()
   const {data: allCaddies} = useQuery('caddiesQuery', getAllCaddiesApi)
@@ -168,8 +186,9 @@ const TeeSheet = () => {
   const [cellSelectedDate, setcellSelectedDate] = useState('')
   const [slotData, setSlotData] = useState<any>([])
   const [allCaddyData, setallCaddyData] = useState<any>([])
+  const [caddyPlayerId, setcaddyPlayerId] = useState<any>([])
+  const [caddyFilteredData, setfilteredData] = useState<any>([])
   var counter = 6
-  let caddyArray: any = []
 
   // const {data: playerMembers, isLoading} = useQuery(['membersQuery', chosenTimeNotLate], () =>
   //   getPlayerMembers(chosenTimeNotLate)
@@ -192,7 +211,7 @@ const TeeSheet = () => {
   //   availabilityStatus: 'yes',
   //   caddyId: 0,
   // })
-  const [caddyData, setCaddyData] = useState<any>([])
+
   const [selectedDate, setSelectedDate] = useState<string>()
   const [modalContent, setModalContent] = useState({
     date: '',
@@ -288,6 +307,7 @@ const TeeSheet = () => {
       },
     })
   }
+
   const getDatestring = () =>
     new Date(
       `${modalContent.date.split('T')[0]}${
@@ -310,7 +330,9 @@ const TeeSheet = () => {
     setallCaddyData([])
     setOpen(false)
   }
-
+  const handleCancelCaddy = () => {
+    setOpenCaddy(false)
+  }
   const handleOnChange = (value: any) => {
     // form.setFieldsValue({
     //   selectDropDown: value
@@ -354,15 +376,15 @@ const TeeSheet = () => {
     )}`
 
     const data = allCaddyData?.find((item: any) => {
-      return item.caddyId == value && item.teeTime == teeTime
+      return item.caddyId == value && item.teeTime == teeTime && item.memberId == caddyPlayerId
     })
 
     if (data) {
       message.info('Caddy already exists for this tee!')
       return
     }
-    if (allCaddyData.length > 3) {
-      message.info('More than 4 caddies cannot be assigned to one tee!')
+    if (allCaddyData.length > 0) {
+      message.info('More than 1 caddy cannot be assigned to one player!')
       return
     }
     const caddyDat = allCaddies?.data.filter((item: any) => {
@@ -370,6 +392,7 @@ const TeeSheet = () => {
     })
 
     const caddyObj = {
+      playerId: caddyPlayerId?.toString(),
       caddyId: value,
       code: caddyDat[0].code ? caddyDat[0].code : 'C-001',
       teeTime: teeTime,
@@ -441,6 +464,7 @@ const TeeSheet = () => {
           queryClient.invalidateQueries('getPlayersQuery')
           queryClient.invalidateQueries('allCaddiesQuery')
           queryClient.invalidateQueries('tees')
+          setOpenCaddy(false)
           //form.resetFields()
           //queryClient.invalidateQueries('membersQuery')
         },
@@ -569,7 +593,7 @@ const TeeSheet = () => {
   const getTeeByDate = allTees?.data.filter((item: any) => {
     return item.teeTime.includes(cellSelectedDate)
   })
-  
+
   //tees per time
   let newDat: any = []
   getNextTwoWeeksDates()
@@ -606,19 +630,31 @@ const TeeSheet = () => {
     const data = getPlayersData?.data.filter((item: any) => {
       return item.teeTime == chosenTimeNotLate
     })
-    const caddyFilteredData = caddyTeesDataApi?.data.filter((item: any) => {
-      return item.teeTime == chosenTimeNotLate
-    })
+    setfilteredData(
+      caddyTeesDataApi?.data.filter((item: any) => {
+        return item.teeTime == chosenTimeNotLate
+      })
+    )
 
     data?.map((item: any) => {
       setSlotData((mem: any) => [...mem, item])
     })
-
-    caddyFilteredData?.map((item: any) => {
-      setallCaddyData((mem: any) => [...mem, item])
-    })
   }, [chosenTimeNotLate])
 
+  // adding caddies
+  const addCaddyPerPlayer = (memberId: number) => {
+    setcaddyPlayerId(memberId)
+
+    const NewCaddyData = caddyFilteredData?.filter((item: any) => {
+      return item.playerId == memberId
+    })
+    setallCaddyData([])
+
+    NewCaddyData?.map((item: any) => {
+      setallCaddyData((mem: any) => [...mem, item])
+    })
+    setOpenCaddy(true)
+  }
   function getNextTwoWeeksDates() {
     //create an array to store next 7 days
     const today = new Date()
@@ -1404,21 +1440,30 @@ const TeeSheet = () => {
                       return (
                         <Col span={22}>
                           <Card
-                            title={item.toDateString()}
+                            title={
+                              <div>
+                                {item.toDateString()}
+                                {eventArr.map((event: any, index: any) => (
+                                  <div key={index} className='fs-8 italic text-success p-1'>
+                                    --{event}
+                                  </div>
+                                ))}
+                              </div>
+                            }
                             bordered={true}
                             onClick={() => {
                               handleCardClick(item)
                             }}
                             className={styles.card}
                           >
-                             {/* <div className='d-flex justify-content-center mt-1'><CrownOutlined className='text-primary fs-6' /></div> */}
+                            {/* <div className='d-flex justify-content-center mt-1'><CrownOutlined className='text-primary fs-6' /></div> */}
                             <div>Total Tees:{newDat[index]}</div>
-                            
-                            {eventArr.map((event: any, index: any) => (
+
+                            {/* {eventArr.map((event: any, index: any) => (
                               <div key={index} className='fs-8 italic text-success p-1'>
                                --{event}
                               </div>
-                            ))}
+                            ))} */}
                           </Card>
                         </Col>
                       )
@@ -1442,26 +1487,26 @@ const TeeSheet = () => {
                         eventArr.push(element.description)
                       })
 
-                     
-
                       return (
                         <Col span={22}>
                           <Card
-                            title={item.toDateString()}
+                            title={
+                              <div>
+                                {item.toDateString()}
+                                {eventArr.map((event: any, index: any) => (
+                                  <div key={index} className='fs-8 italic text-success p-1'>
+                                    --{event}
+                                  </div>
+                                ))}
+                              </div>
+                            }
                             bordered={true}
                             onClick={() => {
                               handleCardClick(item)
                             }}
                             className={styles.card}
                           >
-                           
                             <div>Total Tees:{newDat[index]}</div>
-                             {/* <div className='d-flex justify-content-center mt-1'><CrownOutlined className='text-primary fs-8' /></div> */}
-                            {eventArr.map((event: any, index: any) => (
-                              <div key={index} className='fs-8 italic text-success p-1'>
-                               --{event}
-                              </div>
-                            ))}
                           </Card>
                         </Col>
                       )
@@ -1486,7 +1531,7 @@ const TeeSheet = () => {
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
                 footer={null}
-                width={isSmallScreen ? '90%' : 650}
+                width={isSmallScreen ? '90%' : 700}
               >
                 <Tabs>
                   <Tabs.TabPane tab='Member' key='Member'>
@@ -1521,7 +1566,7 @@ const TeeSheet = () => {
                           {members?.map((member: any) => (
                             <Option key={member.id} value={member.id}>
                               {member.fname}
-                              {member.lname}-{member.code}
+                              {member.lname}-{member.membershipId}
                             </Option>
                           ))}
                         </Select>
@@ -1622,7 +1667,7 @@ const TeeSheet = () => {
                     </div>
                     <Table columns={columns} className='' dataSource={slotData} />
                   </Tabs.TabPane>
-                  <Tabs.TabPane tab='Caddy' key='Caddy'>
+                  {/* <Tabs.TabPane tab='Caddy' key='Caddy'>
                     <Form form={caddForm}>
                       <Space>
                         <Button
@@ -1658,9 +1703,61 @@ const TeeSheet = () => {
                     </Form>
 
                     <Table columns={caddyColumns} dataSource={allCaddyData} className='' />
-                  </Tabs.TabPane>
+                  </Tabs.TabPane> */}
                 </Tabs>
+              </Modal>
+              <Modal
+                // title={`Book for ${new Date(modalContent.date).toDateString()} at ${teeSlot[(modalContent.rowIndex)-1][(modalContent.columnIndex)-1]}`}
+                title={`Add caddy`}
+                open={openCaddy}
+                onOk={handleOk}
+                confirmLoading={confirmLoading}
+                onCancel={handleCancelCaddy}
+                footer={null}
+                width={isSmallScreen ? '90%' : 700}
+              >
+                <Form onFinish={handleCaddyOnSubmit} form={caddForm}>
+                  <Space>
+                    <Button
+                      type='primary'
+                      htmlType='submit'
+                      className='menu-title btn-success mb-2'
+                      onClick={handleCaddyOnSubmit}
+                    >
+                      Ok
+                    </Button>
+                    <Button
+                      className='btn btn-light-danger btn-sm mb-2'
+                      onClick={handleCancelCaddy}
+                    >
+                      Cancel
+                    </Button>
+                  </Space>
+                  {/* <label htmlFor="member-select">Player: </label> */}
+                  <Form.Item
+                    name='selectDropDown'
+                    rules={[{required: true, message: 'Please select caddy'}]}
+                  >
+                    <Select
+                      placeholder='Select caddy'
+                      // onChange={(value) => memberOnChange(value)}
+                      onChange={handleOnChangeCaddy}
+                      className='w-100 mb-2'
+                    >
+                      {/* <option value='' disabled>
+                          Select Player
+                        </option> */}
+                      {allCaddies?.data.map((caddy: any) => (
+                        <Option key={caddy.id} value={caddy.id}>
+                          {caddy.fname}
+                          {caddy.lname}-{caddy.code}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Form>
 
+                <Table columns={caddyColumns} dataSource={allCaddyData} />
               </Modal>
             </Col>
           }

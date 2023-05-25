@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {useThemeMode} from '../../../_metronic/partials'
 import ApexCharts, {ApexOptions} from 'apexcharts'
 import {getCSSVariableValue} from '../../../_metronic/assets/ts/_utils'
@@ -47,7 +47,31 @@ const BarChart: React.FC<Props> = ({className, chartColor, chartHeight, barcolor
     </div>
   )
 }
+const monthNames = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+let newMonthNames: string[] = []
 
+var currentDate = new Date()
+console.log('Original date: ', currentDate.toString())
+
+for (let index = 1; index <= 11; index++) {
+  currentDate.setMonth(currentDate.getMonth() - index)
+  console.log('After subtracting a month: ', monthNames[currentDate.getMonth()])
+  newMonthNames.push(monthNames[currentDate.getMonth()])
+  currentDate = new Date()
+}
 const chartOptions = (chartColor: string, chartHeight: string, color: string): ApexOptions => {
   const labelColor = getCSSVariableValue('--kt-gray-500')
   const borderColor = getCSSVariableValue('--kt-gray-200')
@@ -58,7 +82,7 @@ const chartOptions = (chartColor: string, chartHeight: string, color: string): A
     series: [
       {
         name: 'Total',
-        data: [50, 60, 70, 80, 60, 50, 70, 60, 50, 24, 43, 20],
+        data: [50, 60, 70, 80, 60, 50, 70, 60, 50, 24, 43],
       },
     ],
     chart: {
@@ -88,20 +112,7 @@ const chartOptions = (chartColor: string, chartHeight: string, color: string): A
       colors: ['transparent'],
     },
     xaxis: {
-      categories: [
-        'Dec',
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-      ],
+      categories: newMonthNames,
       axisBorder: {
         show: false,
       },
