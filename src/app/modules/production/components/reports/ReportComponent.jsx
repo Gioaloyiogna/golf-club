@@ -13,8 +13,8 @@ const ReportViewer = (props) => {
   const reportUrl = ko.observable(`${props.reportName}`)
   const viewerRef = useRef()
   const requestOptions = {
-    host: 'https://localhost:44312/',
-    // host: 'http://208.117.44.15/serverside/',
+    //host: 'https://localhost:44312/',
+     host: 'https://app.sipconsult.net/serverside/',
     invokeAction: 'DXXRDV',
   }
 

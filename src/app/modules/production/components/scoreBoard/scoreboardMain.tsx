@@ -34,9 +34,9 @@ const ScoreBoardMain = () => {
   let index = 0
   teeSlotData?.data.filter((item: any) => {
     const itemDate = new Date(item)
-    const today = new Date(Date.now())
+    const today = new Date(Date.now()).toISOString().split('T')[0]
 
-    if (itemDate >= oneWeekAgo && itemDate < today) {
+    if (itemDate.toISOString().split('T')[0] >= oneWeekAgo.toISOString().split('T')[0] && itemDate.toISOString().split('T')[0] < today) {
       teeTimeArrayData.push({
         teeTime: itemDate.toLocaleString('en-US', {
           weekday: 'long',

@@ -4,7 +4,7 @@ import {AsideMenuItemWithSub} from './AsideMenuItemWithSub'
 import {AsideMenuItem} from './AsideMenuItem'
 
 export function AsideMenuMain() {
-  const intl = useIntl()
+  // const intl = useIntl()
 
   return (
     <>
@@ -43,7 +43,7 @@ export function AsideMenuMain() {
         icon='/media/icons/duotune/ecommerce/ecm001.svg'
         title='Shop'
       />
-      
+
       {/*<AsideMenuItem to='pos' fontIcon='bi-archive' icon='/media/icons/duotune/finance/fin007.svg' title='POS' />*/}
       {/*<AsideMenuItem to='partners' fontIcon='bi-archive' icon='/media/icons/duotune/technology/teh010.svg' title='Partners' />*/}
       {/*<AsideMenuItem to='card-management' fontIcon='bi-archive' icon='/media/icons/duotune/finance/fin002.svg' title='Card Management' />*/}
@@ -62,6 +62,20 @@ export function AsideMenuMain() {
         <AsideMenuItem
           to='/reports/members-report'
           title='Member List Report'
+          fontIcon='bi-archive'
+          icon='/media/icons/duotune/communication/com014.svg'
+          hasBullet={false}
+        />
+        <AsideMenuItem
+          to='/reports/member-tees-report'
+          title='Member Tees Report'
+          fontIcon='bi-archive'
+          icon='/media/icons/duotune/communication/com014.svg'
+          hasBullet={false}
+        />
+        <AsideMenuItem
+          to='/reports/event-report'
+          title='Events Report'
           fontIcon='bi-archive'
           icon='/media/icons/duotune/communication/com014.svg'
           hasBullet={false}

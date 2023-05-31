@@ -94,7 +94,7 @@ const TeeSheet = () => {
                 <a
                   href='#'
                   className='btn btn-light-primary btn-sm'
-                  onClick={() => addCaddyPerPlayer(record.memberId)}
+                  onClick={() => addCaddyPerPlayer(record.playerEmail)}
                 >
                   Caddy
                 </a>
@@ -541,7 +541,6 @@ const TeeSheet = () => {
     caddForm.resetFields()
     form.resetFields()
     nonMemberForm.resetFields()
-    setOpen(true)
 
     setChosenTime(
       `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
@@ -550,7 +549,7 @@ const TeeSheet = () => {
         minute: '2-digit',
       })}`
     )
-
+    setOpen(true)
     //  playersData
   }
 
@@ -642,7 +641,7 @@ const TeeSheet = () => {
   }, [chosenTimeNotLate])
 
   // adding caddies
-  const addCaddyPerPlayer = (memberId: number) => {
+  const addCaddyPerPlayer = (memberId: string) => {
     setcaddyPlayerId(memberId)
 
     const NewCaddyData = caddyFilteredData?.filter((item: any) => {

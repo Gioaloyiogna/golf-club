@@ -12,7 +12,27 @@ export const Reports: any = () => {
           <>
             <PageTitle breadcrumbs={accountBreadCrumbs}>Member List Report</PageTitle>
             {/*<Members />*/}
-            <ReportComponent reportName="MemberListReport"/>
+            <ReportComponent reportName='MemberListReport' />
+          </>
+        }
+      />
+      <Route
+        path='member-tees-report'
+        element={
+          <>
+            <PageTitle breadcrumbs={accountBreadCrumbs}>Member List Report</PageTitle>
+            {/*<Members />*/}
+            <ReportComponent reportName='MemberTeesReport' />
+          </>
+        }
+      />
+      <Route
+        path='event-report'
+        element={
+          <>
+            <PageTitle breadcrumbs={accountBreadCrumbs}>Member List Report</PageTitle>
+            {/*<Members />*/}
+            <ReportComponent reportName='EventReport' />
           </>
         }
       />

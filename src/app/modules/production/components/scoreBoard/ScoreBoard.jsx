@@ -124,7 +124,7 @@ const ScoreBoard = () => {
               <tr className='fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200'>
                 <th className='min-w-50px bg-secondary'></th>
                 {data?.map((item, index) => {
-                  if (index<9) {
+                  if (index < 9) {
                     return (
                       <th className='min-w-100px bg-secondary' key={item.id}>
                         Hole {item.holeNumber}
@@ -132,65 +132,79 @@ const ScoreBoard = () => {
                     )
                   }
                 })}
-              
+                <th className='min-w-100px bg-secondary'>Sub-Total</th>
               </tr>
             </thead>
             <tbody className='border'>
               <tr>
                 <th className='fw-bold fs-6 text-gray-800 bg-primary'>Yards</th>
                 {data?.map((item, index) => {
-                  if (index<9) {
+                  if (index < 9) {
                     let total = 0
-                  return (
-                    <>
-                      <td className={'bg-primary'} key={item.id}>
-                        {item.yardage}
-                      </td>
-                    </>
-                  )
+                    return (
+                      <>
+                        <td className={'bg-primary'} key={item.id}>
+                          {item.yardage}
+                        </td>
+                      </>
+                    )
                   }
                 })}
-                
+                <td className={'bg-primary'}>
+                  {data?.reduce((total, item, index) => {
+                    if (index < 9) {
+                      return total + Number(item.yardage)
+                    }
+                    return total
+                  }, 0)}
+                </td>
               </tr>
               <tr>
                 <th className='fw-bold fs-6 text-gray-800 bg-success'>Par</th>
-                {data?.map((item,index) => {
-                 if (index<9) {
-                  return (
-                    <td className={'bg-success'} key={item.id}>
-                      {item.par}
-                    </td>
-                  )
-                 }
+                {data?.map((item, index) => {
+                  if (index < 9) {
+                    return (
+                      <td className={'bg-success'} key={item.id}>
+                        {item.par}
+                      </td>
+                    )
+                  }
                 })}
-               
+                <td className={'bg-success'}>
+                  {data?.reduce((total, item, index) => {
+                    if(index<9){
+                      return total + Number(item.par)
+                    }
+                    return total
+                  }, 0)}
+                </td>
               </tr>
               {playerNames?.map((item) => {
                 return (
                   <tr>
                     <th className='fw-light fs-6 text-gray-800 m-0'>{item.playerName}</th>
                     {data?.map((item, index) => {
-                     if (index <9) {
-                      return (
-                        <td
-                          contentEditable={true}
-                          key={item.id}
-                          onKeyPress={(event) => {
-                            if (isNaN(Number(event.key))) {
-                              event.preventDefault()
-                            }
-                          }}
-                          onInput={(event) => {
-                            const maxLength = 4; // maximum allowed length
-                            if (event.target.innerText.length > maxLength) {
-                              event.target.innerText = event.target.innerText.slice(0, maxLength);
-                            }
-                          }}
-                        >
-                          {item.stroke}
-                        </td>
-                      )
-                     }
+                      if (index < 9) {
+                        return (
+                          <td
+                            contentEditable={true}
+                            key={item.id}
+                            onKeyPress={(event) => {
+                              if (isNaN(Number(event.key))) {
+                                event.preventDefault()
+                              }
+                            }}
+                            onInput={(event) => {
+                              const maxLength = 4 // maximum allowed length
+                              if (event.target.innerText.length > maxLength) {
+                                event.target.innerText = event.target.innerText.slice(0, maxLength)
+                              }
+                            }}
+                          >
+                            {item.stroke}
+                          </td>
+                        )
+                      }
                     })}
                   </tr>
                 )
@@ -212,42 +226,45 @@ const ScoreBoard = () => {
               <tr className='fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200'>
                 <th className='min-w-50px bg-secondary'></th>
                 {data?.map((item, index) => {
-                 if (index>=9) {
-                  return (
-                    <th className='min-w-100px bg-secondary' key={item.id}>
-                      Hole {item.holeNumber}
-                    </th>
-                  )
-                 }
+                  if (index >= 9) {
+                    return (
+                      <th className='min-w-100px bg-secondary' key={item.id}>
+                        Hole {item.holeNumber}
+                      </th>
+                    )
+                  }
                 })}
-                <th className='min-w-100px bg-secondary'>Total</th>
+                <th className='min-w-100px bg-secondary'>Sub-Total</th>
               </tr>
             </thead>
             <tbody className='border'>
               <tr>
                 <th className='fw-bold fs-6 text-gray-800 bg-primary'>Yards</th>
                 {data?.map((item, index) => {
-                 if (index>=9) {
-                  let total = 0
-                  return (
-                    <>
-                      <td className={'bg-primary'} key={item.id}>
-                        {item.yardage}
-                      </td>
-                    </>
-                  )
-                 }
+                  if (index >= 9) {
+                    let total = 0
+                    return (
+                      <>
+                        <td className={'bg-primary'} key={item.id}>
+                          {item.yardage}
+                        </td>
+                      </>
+                    )
+                  }
                 })}
                 <td className={'bg-primary'}>
-                  {data?.reduce((total, item) => {
-                    return total + Number(item.yardage)
+                  {data?.reduce((total, item, index) => {
+                    if(index >=9){
+                      return total + Number(item.yardage)
+                    }
+                    return total
                   }, 0)}
                 </td>
               </tr>
               <tr>
                 <th className='fw-bold fs-6 text-gray-800 bg-success'>Par</th>
                 {data?.map((item, index) => {
-                  if (index>=9) {
+                  if (index >= 9) {
                     return (
                       <td className={'bg-success'} key={item.id}>
                         {item.par}
@@ -256,8 +273,11 @@ const ScoreBoard = () => {
                   }
                 })}
                 <td className={'bg-success'}>
-                  {data?.reduce((total, item) => {
-                    return total + Number(item.par)
+                  {data?.reduce((total, item, index) => {
+                    if(index>=9){
+                      return total + Number(item.par)
+                    }
+                    return total
                   }, 0)}
                 </td>
               </tr>
@@ -266,28 +286,95 @@ const ScoreBoard = () => {
                   <tr>
                     <th className='fw-light fs-6 text-gray-800 m-0'>{item.playerName}</th>
                     {data?.map((item, index) => {
-                     if (index >=9) {
-                      return (
-                        <td
-                          contentEditable={true}
-                          key={item.id}
-                          onKeyPress={(event) => {
-                            if (isNaN(Number(event.key))) {
-                              event.preventDefault()
-                            }
-                          }}
-                          onInput={(event) => {
-                            const maxLength = 4; // maximum allowed length
-                            if (event.target.innerText.length > maxLength) {
-                              event.target.innerText = event.target.innerText.slice(0, maxLength);
-                            }
-                          }}
-                        >
-                          {item.stroke}
-                        </td>
-                      )
-                     }
+                      if (index >= 9) {
+                        return (
+                          <td
+                            contentEditable={true}
+                            key={item.id}
+                            onKeyPress={(event) => {
+                              if (isNaN(Number(event.key))) {
+                                event.preventDefault()
+                              }
+                            }}
+                            onInput={(event) => {
+                              const maxLength = 4 // maximum allowed length
+                              if (event.target.innerText.length > maxLength) {
+                                event.target.innerText = event.target.innerText.slice(0, maxLength)
+                              }
+                            }}
+                          >
+                            {item.stroke}
+                          </td>
+                        )
+                      }
                     })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </KTCard>
+         {/* calculating total and net  */}
+         <KTCard>
+        <div className='table-responsive'>
+          <table
+            className='table border gy-5 gs-5'
+            id={'myTable'}
+            onClick={(e) => {
+              // clickCell(e, dateSelected);
+            }}
+          >
+            <thead className='border'>
+              <tr className='fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200'>
+                <th className='min-w-50px bg-secondary'></th>
+                {/* {data?.map((item, index) => {
+                  if (index < 9) {
+                    return (
+                      <th className='min-w-100px bg-secondary' key={item.id}>
+                        Hole {item.holeNumber}
+                      </th>
+                    )
+                  }
+                })} */}
+                <th className='min-w-100px bg-secondary' >Total</th>
+                <th className='min-w-100px bg-secondary'>Handicap</th>
+                <th className='min-w-100px bg-secondary'>Net</th>
+              </tr>
+            </thead>
+            <tbody className='border'>
+             
+              
+              {playerNames?.map((item) => {
+                return (
+                  <tr>
+                    <th className='fw-light fs-6 text-gray-800 m-0'>{item.playerName}</th>
+                     <td>2</td>
+                     <td>2</td>
+                     <td>2</td>
+                    {/* {data?.map((item, index) => {
+                      if (index < 9) {
+                        return (
+                          <td
+                            contentEditable={true}
+                            key={item.id}
+                            onKeyPress={(event) => {
+                              if (isNaN(Number(event.key))) {
+                                event.preventDefault()
+                              }
+                            }}
+                            onInput={(event) => {
+                              const maxLength = 4 // maximum allowed length
+                              if (event.target.innerText.length > maxLength) {
+                                event.target.innerText = event.target.innerText.slice(0, maxLength)
+                              }
+                            }}
+                          >
+                            {item.stroke}
+                          </td>
+                        )
+                      }
+                    })} */}
                   </tr>
                 )
               })}

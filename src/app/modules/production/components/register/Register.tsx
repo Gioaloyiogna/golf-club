@@ -560,12 +560,7 @@ const Register = () => {
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
                       />
                     </Form.Item>
-                    <Form.Item
-                      label='Phone'
-                     
-                      name={'phone'}
-                      hasFeedback
-                    >
+                    <Form.Item label='Phone' name={'phone'} hasFeedback>
                       <Input
                         placeholder='Enter Phone'
                         value={editMemberDetails?.playerHandicap}
@@ -616,12 +611,10 @@ const Register = () => {
                       name={'ImageFile'}
                       //hasFeedback
                     >
-                      
                       <Input
                         value={editMemberDetails?.picture}
                         type='file'
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                         
                         onChange={handleProfileImage}
                       />
                     </Form.Item>
