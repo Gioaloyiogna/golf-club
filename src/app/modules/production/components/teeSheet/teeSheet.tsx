@@ -505,16 +505,8 @@ const TeeSheet = () => {
       },
     })
   }
-  const [hostMembership, setHostMembership] = useState<string>()
-  const [player2Membership, setplayer2Membership] = useState<string>()
-  const [player3Membership, setplayer3Membership] = useState<string>()
-  const [player4Membership, setplayer4Membership] = useState<string>()
 
-  // const getMembers = async () => {
-  //   const response = await axios.get(`${BASE_URL}/members`);
-  //   return response.data;
-  //   console.log('members', response.data);
-  // }
+  const [trigger, setTrigger] = useState(false)
 
   const memberships = [
     {label: 'Member', value: 'member'},
@@ -528,31 +520,6 @@ const TeeSheet = () => {
   //   console.log(response)
   // }
 
-  function clickCell(e: any, date: any) {
-    if (e.target.tagName !== 'TD') return //ignore the click if it is not on a cell
-    e.target.style.backgroundColor = 'red'
-    setModalContent({
-      date: date,
-      rowIndex: e.target.parentNode.rowIndex,
-      columnIndex: e.target.cellIndex,
-    })
-    setSlotData([])
-    setallCaddyData([])
-    caddForm.resetFields()
-    form.resetFields()
-    nonMemberForm.resetFields()
-
-    setChosenTime(
-      `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-      })}`
-    )
-    setOpen(true)
-    //  playersData
-  }
-
   // picking the chosen date for fetching products
 
   // const updateDate=()=>{
@@ -563,31 +530,31 @@ const TeeSheet = () => {
   // }
 
   // cell per date
-  function clickCell2(e: any, date: any) {
-    // setModalContent({
-    //   date: date,
-    //   rowIndex: e.target.parentNode.rowIndex,
-    //   columnIndex: e.target.cellIndex,
-    // })
-    setOpen(true)
+  // function clickCell2(e: any, date: any) {
+  //   // setModalContent({
+  //   //   date: date,
+  //   //   rowIndex: e.target.parentNode.rowIndex,
+  //   //   columnIndex: e.target.cellIndex,
+  //   // })
+  //   setOpen(true)
 
-    //get row that was click
-    // console.log('row', e.target.parentNode.rowIndex)
-    // //get column that was click
-    // console.log('column', e.target.cellIndex)
-    // setChosenTime(
-    //   `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
-    //     hour12: false,
-    //     hour: '2-digit',
-    //     minute: '2-digit',
-    //   })}`
-    // )
+  //   //get row that was click
+  //   // console.log('row', e.target.parentNode.rowIndex)
+  //   // //get column that was click
+  //   // console.log('column', e.target.cellIndex)
+  //   // setChosenTime(
+  //   //   `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
+  //   //     hour12: false,
+  //   //     hour: '2-digit',
+  //   //     minute: '2-digit',
+  //   //   })}`
+  //   // )
 
-    //  })
-    //  console.log(getPlayers?.data);
+  //   //  })
+  //   //  console.log(getPlayers?.data);
 
-    //  playersData
-  }
+  //   //  playersData
+  // }
 
   const getTeeByDate = allTees?.data.filter((item: any) => {
     return item.teeTime.includes(cellSelectedDate)
@@ -620,25 +587,89 @@ const TeeSheet = () => {
         minute: '2-digit',
       })}`
     )
+    // setTrigger(prevTrigger => !prevTrigger);
   }, [chosenTime])
 
   useEffect(() => {
-    setSlotData([])
-    setallCaddyData([])
+    if (chosenTimeNotLate) {
+      setSlotData([])
+      setallCaddyData([])
 
-    const data = getPlayersData?.data.filter((item: any) => {
-      return item.teeTime == chosenTimeNotLate
-    })
-    setfilteredData(
-      caddyTeesDataApi?.data.filter((item: any) => {
+      const data = getPlayersData?.data.filter((item: any) => {
         return item.teeTime == chosenTimeNotLate
       })
+      setfilteredData(
+        caddyTeesDataApi?.data.filter((item: any) => {
+          return item.teeTime == chosenTimeNotLate
+        })
+      )
+
+      data?.map((item: any) => {
+        setSlotData((mem: any) => [...mem, item])
+      })
+    }
+  }, [chosenTimeNotLate])
+
+  function clickCell(e: any, date: any) {
+    if (e.target.tagName !== 'TD') return //ignore the click if it is not on a cell
+    e.target.style.backgroundColor = 'red'
+    setModalContent({
+      date: date,
+      rowIndex: e.target.parentNode.rowIndex,
+      columnIndex: e.target.cellIndex,
+    })
+
+    setallCaddyData([])
+    setSlotData([])
+    caddForm.resetFields()
+    form.resetFields()
+    nonMemberForm.resetFields()
+
+    setChosenTime(
+      `${modalContent.date.split('T')[0]}${' '}${getDatestring().toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`
     )
 
-    data?.map((item: any) => {
-      setSlotData((mem: any) => [...mem, item])
-    })
-  }, [chosenTimeNotLate])
+    if (chosenTimeNotLate) {
+      // const data = getPlayersData?.data.filter((item: any) => {
+      //     return item.teeTime == chosenTimeNotLate
+      //   })
+      //   setfilteredData(
+      //     caddyTeesDataApi?.data.filter((item: any) => {
+      //       return item.teeTime == chosenTimeNotLate
+      //     })
+      //   )
+
+      //   data?.map((item: any) => {
+      //     setSlotData([...slotData, item])
+      //   })
+
+      const data = getPlayersData?.data.filter((item: any) => {
+        return item.teeTime === chosenTimeNotLate
+      })
+
+      setfilteredData(
+        caddyTeesDataApi?.data.filter((item: any) => {
+          return item.teeTime === chosenTimeNotLate
+        })
+      )
+
+      Promise.all(
+        data?.map((item: any) => {
+          return new Promise<void>((resolve) => {
+            setSlotData((prevSlotData: any) => [...prevSlotData, item])
+            resolve()
+          })
+        })
+      ).then(() => {
+        setOpen(true)
+      })
+    }
+    //  playersData
+  }
 
   // adding caddies
   const addCaddyPerPlayer = (memberId: string) => {
@@ -759,7 +790,7 @@ const TeeSheet = () => {
                         })
                         ?.map((tee: any) => (
                           <p
-                            onClick={(e: any) => clickCell2(e, dateSelected)}
+                            // onClick={(e: any) => clickCell2(e, dateSelected)}
                             style={{cursor: 'pointer'}}
                             className='fs-9 mb-2 fw-light '
                           >
