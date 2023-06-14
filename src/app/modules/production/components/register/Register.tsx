@@ -10,6 +10,7 @@ import {
   Form,
   Select,
   UploadFile,
+  Tabs,
 } from 'antd'
 import {useEffect, useState} from 'react'
 import {Link, Route, Routes} from 'react-router-dom'
@@ -17,7 +18,7 @@ import {KTCard, KTCardBody, KTSVG, toAbsoluteUrl} from '../../../../../_metronic
 import Add from './add/Registration'
 import {PageLink, PageTitle} from '../../../../../_metronic/layout/core'
 import {Query, QueryClient, useMutation, useQuery, useQueryClient} from 'react-query'
-import {getMembers} from '../Requests'
+import {getMembers, getPendingMembers} from '../Requests'
 import {id} from 'date-fns/locale'
 import {
   CheckOutlined,
@@ -34,8 +35,10 @@ const Register = () => {
   // const [gridData, setGridData] = useState([])
 
   const {data: members, isLoading} = useQuery('membersQuery', () => getMembers())
+  const {data: pendingMembers} = useQuery('pendingMembersQuery', () => getPendingMembers())
   const [messageApi, contextHolder] = message.useMessage()
   const [isEditing, setIsEditing] = useState(false)
+  const [isAddingPendingMember, setIsAddingPendingMember] = useState(false)
   const [editMemberDetails, setEditMemberDetails] = useState<any>(null)
   const [modalPic, setModalPic] = useState<string>()
   const [profilePic, setProfilePic] = useState<any>()
@@ -187,7 +190,62 @@ const Register = () => {
       },
     },
   ]
+  const PendingMemberscolumns: any = [
+    {
+      title: 'First Name',
+      sorter: (a: any, b: any) => {
+        if (a.txmodel > b.txmodel) {
+          return 1
+        }
+        if (a.txmodel < b.txmodel) {
+          return -1
+        }
+        return 0
+      },
+      dataIndex: 'fname',
+    },
+    {
+      title: 'Last Name',
+      sorter: (a: any, b: any) => a.downTime - b.downTime,
+      dataIndex: 'lname',
+    },
 
+    {
+      title: 'Email',
+      dataIndex: 'email',
+    },
+    {
+      title: 'Gender',
+      dataIndex: 'gender',
+    },
+
+    {
+      title: 'Action',
+      render: (record: any) => {
+        return (
+          <>
+            <Space size='middle'>
+              <a
+                href='#'
+                className='btn btn-light-warning btn-sm'
+                onClick={() => RegisterPendingMember(record)}
+              >
+                Register
+              </a>
+
+              <a
+                href='#'
+                className='btn btn-light-danger btn-sm'
+                // onClick={() => deactivateUser(record.id)}
+              >
+                Reject
+              </a>
+            </Space>
+          </>
+        )
+      },
+    },
+  ]
   const globalSearch = (value: any) => {
     const query = queryClient.getQueryData<Query<any>>('membersQuery')
     //@ts-ignore
@@ -271,6 +329,11 @@ const Register = () => {
     // form.resetFields()
     queryClient.invalidateQueries('membersQuery')
     setIsEditing(true)
+  }
+  // register pending members
+
+  const RegisterPendingMember = (record: any) => {
+    setIsAddingPendingMember(true)
   }
   //   {
   //     "id": 111,
@@ -378,6 +441,10 @@ const Register = () => {
     setProfilePic('')
     setIsEditing(false)
   }
+  // closing closePendingMembersModal
+  const closePendingMembersModal = () => {
+    setIsAddingPendingMember(false)
+  }
 
   // to preview the uploaded file
   // const onPreview = async (file: UploadFile) => {
@@ -404,125 +471,127 @@ const Register = () => {
             {contextHolder}
             <PageTitle>Members</PageTitle>
             <KTCard>
-              <KTCardBody>
-                <div className='d-flex justify-content-between'>
-                  <Space style={{marginBottom: 16}}>
-                    <Input
-                      placeholder='Enter Search Text'
-                      onChange={handleInputChange}
-                      type='text'
-                      allowClear
-                    />
-                    <Button type='primary'>Search</Button>
-                  </Space>
-                  <Space style={{marginBottom: 16}}>
-                    <Link to='add'>
-                      <button type='button' className='btn btn-primary me-3'>
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr075.svg'
-                          className='svg-icon-2'
+              <Tabs>
+                <Tabs.TabPane tab='Registered Members' key='registeredMembers'>
+                  <KTCardBody>
+                    <div className='d-flex justify-content-between'>
+                      <Space style={{marginBottom: 16}}>
+                        <Input
+                          placeholder='Enter Search Text'
+                          onChange={handleInputChange}
+                          type='text'
+                          allowClear
                         />
-                        Add
-                      </button>
-                    </Link>
-                  </Space>
-                </div>
-                <Table
-                  className='table-responsive'
-                  rowKey={'id'}
-                  columns={columns}
-                  bordered
-                  loading={isLoading}
-                  dataSource={members?.data}
-                />
-                <Modal
-                  title='Edit Member'
-                  open={isEditing}
-                  onCancel={closeModal}
-                  closable={true}
-                  footer={null}
-                >
-                  <Form
-                    style={{maxWidth: 600}}
-                    form={form}
-                    disabled={false}
-                    initialValues={editMemberDetails}
-                    onFinish={onFinish}
-                    {...layout}
-                    name='control-hooks'
-                  >
-                    <Form.Item hidden={true} name={'id'} hasFeedback>
-                      <Input value={editMemberDetails?.id} disabled={false} type='hidden' />
-                    </Form.Item>
-                    <Form.Item
-                      label='First Name'
-                      rules={[{required: true, message: 'Please input your First Name!'}]}
-                      name={'fname'}
-                      hasFeedback
+                        <Button type='primary'>Search</Button>
+                      </Space>
+                      <Space style={{marginBottom: 16}}>
+                        <Link to='/register/add/Registration'>
+                          <button type='button' className='btn btn-primary me-3'>
+                            <KTSVG
+                              path='/media/icons/duotune/arrows/arr075.svg'
+                              className='svg-icon-2'
+                            />
+                            Add
+                          </button>
+                        </Link>
+                      </Space>
+                    </div>
+                    <Table
+                      className='table-responsive'
+                      rowKey={'id'}
+                      columns={columns}
+                      bordered
+                      loading={isLoading}
+                      dataSource={members?.data}
+                    />
+                    <Modal
+                      title='Edit Member'
+                      open={isEditing}
+                      onCancel={closeModal}
+                      closable={true}
+                      footer={null}
                     >
-                      <Input
-                        value={editMemberDetails?.fname}
+                      <Form
+                        style={{maxWidth: 600}}
+                        form={form}
                         disabled={false}
-                        style={{color: 'gray', fontSize: '0.9rem'}}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label='Last Name'
-                      rules={[{required: true, message: 'Please input your Last Name!'}]}
-                      name={'lname'}
-                      hasFeedback
-                    >
-                      <Input
-                        placeholder='Enter Last Name'
-                        value={editMemberDetails?.lname}
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
+                        initialValues={editMemberDetails}
+                        onFinish={onFinish}
+                        {...layout}
+                        name='control-hooks'
+                      >
+                        <Form.Item hidden={true} name={'id'} hasFeedback>
+                          <Input value={editMemberDetails?.id} disabled={false} type='hidden' />
+                        </Form.Item>
+                        <Form.Item
+                          label='First Name'
+                          rules={[{required: true, message: 'Please input your First Name!'}]}
+                          name={'fname'}
+                          hasFeedback
+                        >
+                          <Input
+                            value={editMemberDetails?.fname}
+                            disabled={false}
+                            style={{color: 'gray', fontSize: '0.9rem'}}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label='Last Name'
+                          rules={[{required: true, message: 'Please input your Last Name!'}]}
+                          name={'lname'}
+                          hasFeedback
+                        >
+                          <Input
+                            placeholder='Enter Last Name'
+                            value={editMemberDetails?.lname}
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
 
-                    <Form.Item
-                      label='Email'
-                      rules={[{required: true, message: 'Please input your Email!'}]}
-                      name={'email'}
-                      hasFeedback
-                    >
-                      <Input
-                        placeholder='Enter Email'
-                        value={editMemberDetails?.email}
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label='MemberShip'
-                      rules={[{required: true, message: 'Please input your membership id!'}]}
-                      name={'membershipId'}
-                      hasFeedback
-                    >
-                      <Input
-                        placeholder='Enter Membership'
-                        value={editMemberDetails?.email}
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      name={'gender'}
-                      label='Gender'
-                      rules={[{required: true, message: 'Please input your Gender!'}]}
-                      style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                    >
-                      <Select
-                        placeholder='Select Gender'
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                        // onChange={(value) => memberOnChange(value)}
-                        // onChange={handleOnChange}
-                        className='w-100 mb-2'
-                        options={[
-                          {value: 'Male', label: 'Male'},
-                          {value: 'Female', label: 'Female'},
-                        ]}
-                      ></Select>
-                    </Form.Item>
+                        <Form.Item
+                          label='Email'
+                          rules={[{required: true, message: 'Please input your Email!'}]}
+                          name={'email'}
+                          hasFeedback
+                        >
+                          <Input
+                            placeholder='Enter Email'
+                            value={editMemberDetails?.email}
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label='MemberShip'
+                          rules={[{required: true, message: 'Please input your membership id!'}]}
+                          name={'membershipId'}
+                          hasFeedback
+                        >
+                          <Input
+                            placeholder='Enter Membership'
+                            value={editMemberDetails?.email}
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          name={'gender'}
+                          label='Gender'
+                          rules={[{required: true, message: 'Please input your Gender!'}]}
+                          style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                        >
+                          <Select
+                            placeholder='Select Gender'
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                            // onChange={(value) => memberOnChange(value)}
+                            // onChange={handleOnChange}
+                            className='w-100 mb-2'
+                            options={[
+                              {value: 'Male', label: 'Male'},
+                              {value: 'Female', label: 'Female'},
+                            ]}
+                          ></Select>
+                        </Form.Item>
 
-                    {/* <Form.Item
+                        {/* <Form.Item
                       label='Gender'
                       rules={[{required: true, message: 'Please input your Gender!'}]}
                       name={'gender'}
@@ -534,115 +603,326 @@ const Register = () => {
                         style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
                       />
                     </Form.Item> */}
-                    <Form.Item
-                      label='Date OF Birth'
-                      rules={[{required: true, message: 'Please input your date of birth!'}]}
-                      name={'DOB'}
-                      hasFeedback
-                    >
-                      <Input
-                        placeholder='Enter Last Name'
-                        defaultValue={editMemberDetails?.DOB}
-                        type='date'
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label='Player Handicap'
-                      rules={[{required: true, message: 'Please input your Last Name!'}]}
-                      name={'playerHandicap'}
-                      hasFeedback
-                    >
-                      <Input
-                        placeholder='Enter Last Player Handicap'
-                        value={editMemberDetails?.playerHandicap}
-                        type='number'
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
-                    <Form.Item label='Phone' name={'phone'} hasFeedback>
-                      <Input
-                        placeholder='Enter Phone'
-                        value={editMemberDetails?.playerHandicap}
-                        type='number'
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label='GGAID'
-                      rules={[{required: true, message: 'Please input your GGAID!'}]}
-                      name={'ggaid'}
-                      hasFeedback
-                    >
-                      <Input
-                        placeholder='Enter your GGAID'
-                        value={editMemberDetails?.ggaid}
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label='Status'
-                      rules={[{required: true, message: 'Please enter your status!'}]}
-                      name={'status'}
-                      hasFeedback
-                    >
-                      <Input
-                        placeholder='Enter Satus'
-                        value={editMemberDetails?.status}
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                      />
-                    </Form.Item>
-                    <div style={{paddingLeft: '33%', paddingBottom: '1rem'}}>
-                      {modalPic && (
-                        <img src={`${PIC_URL}/member/${modalPic}`} alt='' style={{width: '50px'}} />
-                      )}
-                      {profilePic && <img src={profilePic} alt='' style={{width: '50px'}} />}
-                      {!modalPic && !profilePic && (
-                        <img
-                          src={toAbsoluteUrl('/media/avatars/blank.png')}
-                          alt=''
-                          style={{width: '50px'}}
+                        <Form.Item
+                          label='Date OF Birth'
+                          rules={[{required: true, message: 'Please input your date of birth!'}]}
+                          name={'DOB'}
+                          hasFeedback
+                        >
+                          <Input
+                            placeholder='Enter Last Name'
+                            defaultValue={editMemberDetails?.DOB}
+                            type='date'
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label='Player Handicap'
+                          rules={[{required: true, message: 'Please input your Last Name!'}]}
+                          name={'playerHandicap'}
+                          hasFeedback
+                        >
+                          <Input
+                            placeholder='Enter Last Player Handicap'
+                            value={editMemberDetails?.playerHandicap}
+                            type='number'
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
+                        <Form.Item label='Phone' name={'phone'} hasFeedback>
+                          <Input
+                            placeholder='Enter Phone'
+                            value={editMemberDetails?.playerHandicap}
+                            type='number'
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label='GGAID'
+                          rules={[{required: true, message: 'Please input your GGAID!'}]}
+                          name={'ggaid'}
+                          hasFeedback
+                        >
+                          <Input
+                            placeholder='Enter your GGAID'
+                            value={editMemberDetails?.ggaid}
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label='Status'
+                          rules={[{required: true, message: 'Please enter your status!'}]}
+                          name={'status'}
+                          hasFeedback
+                        >
+                          <Input
+                            placeholder='Enter Satus'
+                            value={editMemberDetails?.status}
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                          />
+                        </Form.Item>
+                        <div style={{paddingLeft: '33%', paddingBottom: '1rem'}}>
+                          {modalPic && (
+                            <img
+                              src={`${PIC_URL}/member/${modalPic}`}
+                              alt=''
+                              style={{width: '50px'}}
+                            />
+                          )}
+                          {profilePic && <img src={profilePic} alt='' style={{width: '50px'}} />}
+                          {!modalPic && !profilePic && (
+                            <img
+                              src={toAbsoluteUrl('/media/avatars/blank.png')}
+                              alt=''
+                              style={{width: '50px'}}
+                            />
+                          )}
+                        </div>
+                        <Form.Item
+                          label='Profile Picture'
+                          // rules={[{required: true, message: 'Please upload file!'}]}
+                          name={'ImageFile'}
+                          //hasFeedback
+                        >
+                          <Input
+                            value={editMemberDetails?.picture}
+                            type='file'
+                            style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
+                            onChange={handleProfileImage}
+                          />
+                        </Form.Item>
+                        <Form.Item {...tailLayout}>
+                          <Button key='back' onClick={() => setIsEditing(false)} className='me-1'>
+                            Cancel
+                          </Button>
+                          <Button key='submit' type='primary' htmlType='submit'>
+                            Save
+                          </Button>
+                        </Form.Item>
+                      </Form>
+                    </Modal>
+                  </KTCardBody>
+                </Tabs.TabPane>
+                <Tabs.TabPane tab='Pending Members'>
+                  <KTCardBody>
+                    <div className='d-flex justify-content-between'>
+                      <Space style={{marginBottom: 16}}>
+                        <Input
+                          placeholder='Enter Search Text'
+                          onChange={handleInputChange}
+                          type='text'
+                          allowClear
                         />
-                      )}
+                        <Button type='primary'>Search</Button>
+                      </Space>
                     </div>
-                    <Form.Item
-                      label='Profile Picture'
-                      // rules={[{required: true, message: 'Please upload file!'}]}
-                      name={'ImageFile'}
-                      //hasFeedback
+                    <Table
+                      className='table-responsive'
+                      rowKey={'id'}
+                      columns={PendingMemberscolumns}
+                      bordered
+                      loading={isLoading}
+                      dataSource={pendingMembers?.data}
+                    />
+                    <Modal
+                      title='Register Member'
+                      open={isAddingPendingMember}
+                      onCancel={closePendingMembersModal}
+                      closable={true}
+                      footer={null}
+                      width={'50%'}
                     >
-                      <Input
-                        value={editMemberDetails?.picture}
-                        type='file'
-                        style={{color: 'gray', fontSize: '0.9rem', fontWeight: 'lighter'}}
-                        onChange={handleProfileImage}
-                      />
-                    </Form.Item>
-                    <Form.Item {...tailLayout}>
-                      <Button key='back' onClick={() => setIsEditing(false)} className='me-1'>
-                        Cancel
-                      </Button>
-                      <Button key='submit' type='primary' htmlType='submit'>
-                        Save
-                      </Button>
-                    </Form.Item>
-                  </Form>
-                </Modal>
-              </KTCardBody>
+                      <div
+                        className='col-12'
+                        style={{
+                          backgroundColor: 'white',
+                          padding: '40px',
+                          borderRadius: '5px',
+                          boxShadow: '2px 2px 15px rgba(0,0,0,0.08)',
+                        }}
+                      >
+                        <Form name='control-hooks' title={'Add Member'}>
+                          <div>
+                            <div className='row mb-0'>
+                              <div className='col-6 mb-7'>
+                                {/* <Upload
+                listType='picture-card'
+                fileList={fileList}
+                onChange={onChange}
+                onPreview={onPreview}
+              >
+                <UploadOutlined />
+              </Upload> */}
+                                <Form.Item name='file'>
+                                  <input
+                                    className='mb-3 btn btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary'
+                                    // onChange={onFileChange}
+                                    type='file'
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+                            <div className='row mb-0'>
+                              <div className='col-6 mb-7'>
+                                <label
+                                  htmlFor='exampleFormControlInput1'
+                                  className='required form-label'
+                                >
+                                  Membership ID
+                                </label>
+                                <Form.Item name='code'>
+                                  <Input
+                                    type='text'
+                                    required={true}
+                                    className='form-control form-control-solid'
+                                  />
+                                </Form.Item>
+                              </div>
+                              <div className='col-6 mb-7'>
+                                <label
+                                  htmlFor='exampleFormControlInput1'
+                                  className='required form-label'
+                                >
+                                  First Name
+                                </label>
+                                <Form.Item name='fname'>
+                                  <Input
+                                    type='text'
+                                    required={true}
+                                    className='form-control form-control-solid'
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+
+                            <div className='row mb-0'>
+                              <div className='col-6 mb-7'>
+                                <label
+                                  htmlFor='exampleFormControlInput1'
+                                  className='required form-label'
+                                >
+                                  Last Name
+                                </label>
+                                <Form.Item name='lname'>
+                                  <Input
+                                    type='text'
+                                    required={true}
+                                    className='form-control form-control-solid'
+                                  />
+                                </Form.Item>
+                              </div>
+                              <div className='col-6 mb-7'>
+                                <label
+                                  htmlFor='exampleFormControlInput1'
+                                  className='required form-label'
+                                >
+                                  Date of Birth
+                                </label>
+                                <Form.Item name='dateOfBirth' style={{width: '30%'}}>
+                                  <Input
+                                    type='date'
+                                    required={true}
+                                    className='form-control form-control-solid'
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+                            <div className='row mb-0'>
+                              <div className='col-6 mb-7'>
+                                <label htmlFor='exampleFormControlInput1' className='form-label'>
+                                  Gender
+                                </label>
+
+                                <Form.Item name='gender' style={{width: '30%'}}>
+                                  <Select className={'form-select form-select-solid'}>
+                                    {/* <Option value='male'>MALE</Option>
+                  <Option value='female'>FEMALE</Option> */}
+                                  </Select>
+                                </Form.Item>
+                              </div>
+                              <div className='col-6 mb-7'>
+                                <label
+                                  htmlFor='exampleFormControlInput1'
+                                  className='required form-label'
+                                >
+                                  Phone Number
+                                </label>
+                                <Form.Item name='phone'>
+                                  <Input
+                                    type='number'
+                                    required={true}
+                                    className='form-control form-control-solid'
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+                            <div className='row mb-0'>
+                              <div className='col-6 mb-7'>
+                                <label
+                                  htmlFor='exampleFormControlInput1'
+                                  className='required form-label'
+                                >
+                                  Email
+                                </label>
+                                <Form.Item name='email'>
+                                  <Input
+                                    type='email'
+                                    required={true}
+                                    className='form-control form-control-solid'
+                                  />
+                                </Form.Item>
+                              </div>
+                              <div className='col-6 mb-7'>
+                                <label
+                                  htmlFor='exampleFormControlInput1'
+                                  className='required form-label'
+                                >
+                                  Player Handicap
+                                </label>
+                                <Form.Item name='playerHandicap'>
+                                  <Input
+                                    type='text'
+                                    required={true}
+                                    className='form-control form-control-solid'
+                                  />
+                                </Form.Item>
+                              </div>
+                            </div>
+
+                            <div className='row mb-0'>
+                              <div className='row mb-0'>
+                                <div className='col-6 mb-7'>
+                                  <label
+                                    htmlFor='exampleFormControlInput1'
+                                    className='required form-label'
+                                  >
+                                    GGA ID#
+                                  </label>
+                                  <Form.Item name='ggaid'>
+                                    <Input
+                                      type='text'
+                                      required={true}
+                                      className='form-control form-control-solid'
+                                    />
+                                  </Form.Item>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <Button type='primary' key='submit' htmlType='submit'>
+                            Submit
+                          </Button>
+                        </Form>
+                      </div>
+                    </Modal>
+                  </KTCardBody>
+                </Tabs.TabPane>
+              </Tabs>
             </KTCard>
           </>
         }
       />
-      {/*add*/}
-      <Route
-        path='add'
-        element={
-          <>
-            <PageTitle>Add new member</PageTitle>
-            <Add />
-          </>
-        }
-      />
+      ]
     </Routes>
   )
 }

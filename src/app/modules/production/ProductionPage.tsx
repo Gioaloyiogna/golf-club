@@ -16,6 +16,8 @@ import {AddGameTypeSetup} from './components/teeSheet/setup/AddGameTypeSetup'
 import {ScoreBoard} from './components/scoreBoard/ScoreBoard'
 import {Course, CourseList} from './components/teeSheet/setup/CourseSetup'
 import {ScoreBoardMain} from './components/scoreBoard/scoreboardMain'
+import { Registration } from '../auth/components/Registration'
+import Add from './components/register/add/Registration'
 const accountBreadCrumbs: Array<PageLink> = []
 
 const ProductionPage: React.FC = () => {
@@ -30,6 +32,15 @@ const ProductionPage: React.FC = () => {
             <Register />
           </>
         }
+      />
+      <Route
+      path='/register/add/Registration'
+      element={
+       <>
+       <Add/>
+       </>
+      }
+      
       />
       <Route
         path='/planning/*'

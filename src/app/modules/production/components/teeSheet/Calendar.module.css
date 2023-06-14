@@ -33,12 +33,12 @@
 
 .card:hover {
   transform: scale(0.95, 0.95);
-  box-shadow: 2px 2px 10px 2px rgb(43, 122, 11), -2px -2px 10px 2px rgb(43, 122, 11);
+  box-shadow: 2px 2px 10px 2px #3B591A, -2px -2px 10px 2px #3B591A;
 }
 
 .sheet {
   border-radius: 20px;
-  box-shadow: 2px 2px 10px 2px rgb(43, 122, 11), -2px -2px 10px 2px rgb(43, 122, 11);
+  box-shadow: 2px 2px 10px 2px #3B591A, -2px -2px 10px 2px #3B591A;
   transform: scale(0.95, 0.95);
 }
 

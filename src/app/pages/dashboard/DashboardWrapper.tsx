@@ -8,6 +8,7 @@ import {DashboardTable} from './dashboardTable/CycleDetailsList'
 import {KTCard, KTCardBody, KTSVG} from '../../../_metronic/helpers'
 import {Button, Card, Input, Modal, Space, Table} from 'antd'
 import {Link} from 'react-router-dom'
+
 import {
   CheckSquareOutlined,
   CloseSquareFilled,
@@ -78,7 +79,7 @@ const DashboardPage: FC = () => {
         return currentPlayersArray[record.key].map((tee: any, index: any) => {
           index++
           const newDate = new Date(tee.teeTime)
-          
+
           return (
             <div key={tee.id}>
               <label className='d-flex'>
@@ -203,7 +204,24 @@ const DashboardPage: FC = () => {
           <>
             <Space size='middle'>
               <Button
-                className='btn btn-light-warning btn-sm'
+                 className='btn btn-light-warning btn-sm'
+                // style={{color:'white', backgroundColor:'#3B591A'}}
+                // onMouseOver={(e) => {
+                //   const target = e.currentTarget as HTMLElement;
+                //   target.style.backgroundColor = '#000'; // Change this to the desired hover background color
+                //   target.style.color = '#fff'; 
+                //   target.style.border='none';
+                //   target.style.all='0.5'
+
+                // }}
+                // onMouseOut={(e) => {
+                //   const target = e.currentTarget as HTMLElement;
+                //   target.style.backgroundColor = '#3B591A'; // Change this to the default background color
+                //   target.style.color = 'white'; // Change this to the default text color
+                //   target.style.border='none';
+                  
+                // }}
+                
                 onClick={() => caddyDetails(record.key)}
               >
                 Tees

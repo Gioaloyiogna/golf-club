@@ -740,7 +740,7 @@ const MenuTestPage: FC = () => {
                       <SVG src={toAbsoluteUrl('/media/logos/default-small.svg')} />
                     </span>
                   </span>
-                  <span className='menu-title'>Dashboard</span>
+                  <span className='new-menu-title'>Dashboard</span>
                 </a>
               </div>
               <div className='menu-item pt-5'>

@@ -5,6 +5,9 @@ import {API_URL} from '../../../urls'
 export const getMembers: any = () => {
   return axios.get(`${API_URL}/members`)
 }
+export const getPendingMembers:any=()=>{
+  return axios.get(`${API_URL}/PendingMembers`)
+}
 export const getPlayers: any = () => {
   return axios.get(`${API_URL}/TeeSlots`)
 }

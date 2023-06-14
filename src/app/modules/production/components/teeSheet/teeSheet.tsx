@@ -747,7 +747,7 @@ const TeeSheet = () => {
 
     return (
       <>
-        <KTCard className={styles.sheet}>
+        <KTCard className={styles.sheet}  >
           <KTCardBody>
             <div className='table-responsive'>
               {/*title for the table*/}
